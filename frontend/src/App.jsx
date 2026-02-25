@@ -1,36 +1,38 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 
-// Force the connection to the backend port
 const socket = io('http://localhost:4000');
 
 function App() {
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState('');
   const [isConnected, setIsConnected] = useState(socket.connected);
+  
+  // NEW: Reference to the bottom of the chat for auto-scrolling
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
-    // 1. Connection Debugging
-    socket.on('connect', () => {
-      console.log("✅ Connected with ID:", socket.id);
-      setIsConnected(true);
-    });
-    
-    socket.on('disconnect', () => {
-      console.log("❌ Disconnected");
-      setIsConnected(false);
-    });
+    scrollToBottom();
+  }, [messages]);
 
-    // 2. The Listener
+  useEffect(() => {
+    socket.on('connect', () => setIsConnected(true));
+    socket.on('disconnect', () => setIsConnected(false));
+    
+    socket.on('load_history', (history) => setMessages(history));
+    
     socket.on('receive_message', (data) => {
-      console.log("📨 Incoming Message:", data); 
-      // We only add the message if the SERVER sent it back
-      setMessages((prevMessages) => [...prevMessages, data]);
+      setMessages((prev) => [...prev, data]);
     });
 
     return () => {
       socket.off('connect');
       socket.off('disconnect');
+      socket.off('load_history');
       socket.off('receive_message');
     };
   }, []);
@@ -40,61 +42,131 @@ function App() {
     if (messageInput.trim() !== '') {
       const newMessage = {
         text: messageInput,
-        sender: 'Engineer-' + socket.id?.substr(0, 4) // Use real Socket ID
+        sender: 'Engineer-' + socket.id?.substr(0, 4)
       };
-      
-      // REMOVED: Optimistic Update
-      // We do NOT add it locally. We wait for the server echo.
-      
-      console.log("📤 Sending:", newMessage);
       socket.emit('send_message', newMessage);
       setMessageInput(''); 
     }
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto' }}>
-      <h1>OpsCommand War Room</h1>
+    <div style={{ 
+      backgroundColor: '#0d1117', // Deep GitHub Dark background
+      color: '#c9d1d9', 
+      minHeight: '100vh', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center',
+      fontFamily: "'Courier New', Courier, monospace", // Terminal font
+      padding: '20px',
+      margin: '-8px' // Reset default browser margin
+    }}>
       
-      {/* CONNECTION STATUS BADGE */}
-      <div style={{ 
-        padding: '10px', 
-        backgroundColor: isConnected ? '#d4edda' : '#f8d7da', 
-        color: isConnected ? '#155724' : '#721c24',
-        marginBottom: '10px',
-        borderRadius: '4px',
-        fontWeight: 'bold'
-      }}>
-        STATUS: {isConnected ? '🟢 CONNECTED' : '🔴 DISCONNECTED'}
-      </div>
+      <div style={{ width: '100%', maxWidth: '800px' }}>
+        
+        {/* Header */}
+        <h1 style={{ color: '#58a6ff', borderBottom: '2px solid #30363d', paddingBottom: '10px', marginTop: '0' }}>
+          Terminal // OpsCommand
+        </h1>
 
-      <div style={{ 
-        border: '1px solid #ccc', 
-        height: '400px', 
-        overflowY: 'scroll', 
-        padding: '15px', 
-        marginBottom: '15px',
-        backgroundColor: '#f9f9f9'
-      }}>
-        {messages.map((msg, index) => (
-          <div key={index} style={{ color: '#333',marginBottom: '10px', padding: '5px', borderBottom: '1px solid #eee' }}>
-            <strong style={{color: '#007bff'}}>{msg.sender}:</strong> {msg.text}
-          </div>
-        ))}
-      </div>
+        {/* Status Bar */}
+        <div style={{ 
+          backgroundColor: isConnected ? '#238636' : '#da3633', 
+          color: '#ffffff', 
+          padding: '8px 12px', 
+          borderRadius: '6px', 
+          marginBottom: '15px',
+          fontWeight: 'bold',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          <span style={{ display: 'inline-block', width: '10px', height: '10px', backgroundColor: '#fff', borderRadius: '50%' }}></span>
+          {isConnected ? 'SYSTEM ONLINE' : 'SYSTEM OFFLINE - RECONNECTING...'}
+        </div>
 
-      <form onSubmit={sendMessage} style={{ display: 'flex', gap: '10px' }}>
-        <input 
-          type="text" 
-          value={messageInput} 
-          onChange={(e) => setMessageInput(e.target.value)} 
-          placeholder="Type message..."
-          style={{ flex: 1, padding: '10px', fontSize: '16px' }}
-        />
-        <button type="submit" disabled={!isConnected} style={{ padding: '10px 20px', cursor: 'pointer' }}>
-          Send
-        </button>
-      </form>
+        {/* Chat Box */}
+        <div style={{ 
+          backgroundColor: '#161b22', 
+          border: '1px solid #30363d', 
+          borderRadius: '6px',
+          height: '500px', 
+          overflowY: 'auto', 
+          padding: '20px', 
+          marginBottom: '15px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+        }}>
+          {messages.length === 0 ? (
+            <p style={{ color: '#8b949e', fontStyle: 'italic' }}>Awaiting incident reports...</p>
+          ) : null}
+          
+          {messages.map((msg, index) => {
+            // Check if the message is from our bot
+            const isBot = msg.sender === 'OpsBot';
+            
+            return (
+              <div key={index} style={{ 
+                marginBottom: '12px', 
+                padding: '10px', 
+                backgroundColor: isBot ? '#1f2428' : 'transparent', 
+                borderLeft: isBot ? '4px solid #e3b341' : 'none', // Yellow accent for bot
+                borderRadius: '4px'
+              }}>
+                <strong style={{ color: isBot ? '#e3b341' : '#79c0ff' }}>
+                  {msg.sender}:
+                </strong> 
+                <span style={{ marginLeft: '10px', color: isBot ? '#d2a8ff' : '#c9d1d9' }}>
+                  {msg.text}
+                </span>
+              </div>
+            )
+          })}
+          {/* Invisible div to pull the scrollbar down */}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input Form */}
+        <form onSubmit={sendMessage} style={{ display: 'flex', gap: '10px' }}>
+          <input 
+            type="text" 
+            value={messageInput} 
+            onChange={(e) => setMessageInput(e.target.value)} 
+            placeholder="Enter command (e.g., /status) or message..."
+            style={{ 
+              flex: 1, 
+              padding: '15px', 
+              fontSize: '16px',
+              backgroundColor: '#0d1117',
+              border: '1px solid #30363d',
+              borderRadius: '6px',
+              color: '#c9d1d9',
+              fontFamily: 'inherit',
+              outline: 'none'
+            }}
+            onFocus={(e) => e.target.style.borderColor = '#58a6ff'}
+            onBlur={(e) => e.target.style.borderColor = '#30363d'}
+          />
+          <button 
+            type="submit" 
+            disabled={!isConnected} 
+            style={{ 
+              padding: '0 30px', 
+              fontSize: '16px', 
+              cursor: isConnected ? 'pointer' : 'not-allowed',
+              backgroundColor: '#238636',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: 'bold',
+              fontFamily: 'inherit',
+              transition: 'background-color 0.2s'
+            }}
+          >
+            EXECUTE
+          </button>
+        </form>
+
+      </div>
     </div>
   );
 }
