@@ -1,0 +1,52 @@
+---
+# 1. Backend Deployment (Manages the Pods)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ops-backend
+  labels:
+    app: backend
+spec:
+  replicas: 2 # High Availability
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: node-backend
+        image: ops-command-backend
+        imagePullPolicy: Never # Use the image we built locally
+        ports:
+        - containerPort: 4000
+        env:
+        # Pull PORT from the ConfigMap
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: ops-config
+              key: PORT
+        # Pull MONGO_URI from the Secret
+        - name: MONGO_URI
+          valueFrom:
+            secretKeyRef:
+              name: ops-secret
+              key: MONGO_URI
+
+---
+# 2. Backend Service (Internal Load Balancer)
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  type: ClusterIP # Internal traffic only
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 4000
+      targetPort: 4000

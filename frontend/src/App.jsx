@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:4000');
+// Use Vite's environment variable system, but fallback to localhost for Skaffold
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+const socket = io(BACKEND_URL);
 
 function App() {
   const [messages, setMessages] = useState([]);

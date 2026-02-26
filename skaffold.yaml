@@ -1,0 +1,17 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+build:
+  # Tell Skaffold we are using a local cluster, so it shouldn't try to push to Docker Hub
+  local:
+    push: false
+  artifacts:
+    # Watch the frontend folder and build this image
+    - image: ops-command-frontend
+      context: frontend
+    # Watch the backend folder and build this image
+    - image: ops-command-backend
+      context: backend
+manifests:
+  rawYaml:
+    # Apply everything in the k8s folder
+    - k8s/*.yaml

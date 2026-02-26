@@ -1,0 +1,40 @@
+---
+# 1. Frontend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ops-frontend
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: react-frontend
+        image: ops-command-frontend
+        imagePullPolicy: Never # Use the image we built locally
+        ports:
+        - containerPort: 5173
+
+---
+# 2. Frontend Service (External Access)
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  type: NodePort # Opens a port on the local machine to access the UI
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 5173
+      targetPort: 5173
+      nodePort: 30007 # We are forcing it to this specific port for easy access
