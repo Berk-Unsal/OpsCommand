@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: opscommand-ingress
+  annotations:
+    # This prevents WebSockets from timing out during quiet periods
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  rules:
+  - host: opscommand.local
+    http:
+      paths:
+      # 1. Route WebSocket traffic directly to the backend
+      - path: /socket.io
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 4000
+      # 2. Route all other traffic (the UI) to the frontend
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 5173

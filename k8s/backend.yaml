@@ -16,6 +16,7 @@ spec:
       labels:
         app: backend
     spec:
+      serviceAccountName: opsbot-sa
       containers:
       - name: node-backend
         image: ops-command-backend

@@ -1,14 +1,24 @@
 const express = require('express');
 const http = require('http');
-const cors = require('cors');
 const { Server } = require('socket.io');
-const mongoose = require('mongoose'); // Import Mongoose
+const cors = require('cors');
+const mongoose = require('mongoose');
+const k8s = require('@kubernetes/client-node');
+const fs = require('fs');         // <-- Add this
+const path = require('path');     // <-- Add this
+
+// Configure the client to use the ServiceAccount injected into the Pod
+const kc = new k8s.KubeConfig();
+kc.loadFromCluster(); 
+const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 
 const app = express();
 const server = http.createServer(app);
 const PORT = 4000;
 
-app.use(cors());
+app.use(cors({
+    origin: ["http://localhost:5173", "http://opscommand.local"]
+}));
 app.use(express.json());
 
 // 1. Connect to MongoDB
@@ -29,10 +39,22 @@ const Message = mongoose.model('Message', MessageSchema);
 // 3. Socket Setup
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://opscommand.local"],
     methods: ["GET", "POST"]
   }
 });
+
+// --- DYNAMIC COMMAND LOADER ---
+const commands = new Map();
+const commandsPath = path.join(__dirname, 'commands');
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+    const command = require(path.join(commandsPath, file));
+    commands.set(command.name, command);
+    console.log(`[OpsBot] Loaded command: ${command.name}`);
+}
+// ------------------------------
 
 io.on('connection', async (socket) => {
   console.log(`🔌 Connected: ${socket.id}`);
@@ -66,21 +88,21 @@ io.on('connection', async (socket) => {
 });
 
 // Helper for Commands
-function handleCommand(socket, data) {
-    const command = data.text.split(' ')[0]; // Get the first word
+async function handleCommand(socket, data) {
+    const commandName = data.text.split(' ')[0]; // Extract the command (e.g., "/status")
 
-    if (command === '/status') {
-        // Send a "System Message" only to the person who asked
-        socket.emit('receive_message', {
-            sender: 'OpsBot',
-            text: '🟢 All Systems Operational. CPU: 12% | RAM: 4GB',
-            type: 'system'
-        });
-    } else if (command === '/clear') {
-       // We can implement clearing later
-       socket.emit('receive_message', { sender: 'OpsBot', text: 'Clear command not implemented yet.', type: 'system' });
+    // Check if the command exists in our Map
+    if (commands.has(commandName)) {
+        const command = commands.get(commandName);
+        // Execute the command, passing the data and our context tools
+        await command.execute(data, { socket, io, k8sApi, commands });
     } else {
-        socket.emit('receive_message', { sender: 'OpsBot', text: `Unknown command: ${command}`, type: 'system' });
+        // Fallback for unknown commands
+        socket.emit('receive_message', { 
+            sender: 'OpsBot', 
+            text: `Unknown command: ${commandName}.`, 
+            type: 'system' 
+        });
     }
 }
 

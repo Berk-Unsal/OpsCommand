@@ -40,3 +40,9 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Preserves backend formatting like \n and spaces */
+.pre-wrap-text {
+  white-space: pre-wrap;
+  word-wrap: break-word; /* Ensures long strings don't break the UI */
+}

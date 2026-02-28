@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 
 // Use Vite's environment variable system, but fallback to localhost for Skaffold
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
-const socket = io(BACKEND_URL);
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://opscommand.local';
+const socket = io(BACKEND_URL, {
+    transports: ['websocket'] // Skip the coin flip, go straight to the persistent socket
+});
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -117,9 +119,14 @@ function App() {
                 <strong style={{ color: isBot ? '#e3b341' : '#79c0ff' }}>
                   {msg.sender}:
                 </strong> 
-                <span style={{ marginLeft: '10px', color: isBot ? '#d2a8ff' : '#c9d1d9' }}>
-                  {msg.text}
-                </span>
+                <span style={{ 
+                marginLeft: '10px', 
+                color: isBot ? '#d2a8ff' : '#c9d1d9',
+                whiteSpace: 'pre-wrap',      // <-- This tells React to respect the \n line breaks
+                wordBreak: 'break-word'      // <-- This prevents long text from pushing outside the box
+              }}>
+                {msg.text}
+              </span>
               </div>
             )
           })}
