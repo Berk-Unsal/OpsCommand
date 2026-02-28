@@ -1,0 +1,30 @@
+name: OpsCommand CI Pipeline
+
+# 1. THE TRIGGER: When should this run?
+on:
+  push:
+    branches:
+      - main # Runs every time you push to the main branch
+
+# 2. THE WORKER: What kind of server do we need?
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest # GitHub gives us a fresh Ubuntu Linux machine
+
+    # 3. THE TASKS: What exactly should the worker do?
+    steps:
+      # Task A: Download our code onto the Ubuntu machine
+      - name: 📥 Checkout Source Code
+        uses: actions/checkout@v4
+
+      # Task B: Install Docker's advanced build tools
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Task C: Actually build the backend image
+      - name: 🏗️ Build Backend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend # Tells Docker where the Dockerfile lives
+          push: false        # We are just testing if it builds successfully for now!
+          tags: opscommand-backend:latest
