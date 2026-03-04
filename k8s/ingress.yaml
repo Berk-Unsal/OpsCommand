@@ -20,7 +20,15 @@ spec:
             name: backend-service
             port:
               number: 4000
-      # 2. Route all other traffic (the UI) to the frontend
+      # 2. Route API traffic to the backend
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 4000
+      # 3. Route all other traffic (the UI) to the frontend
       - path: /
         pathType: Prefix
         backend:

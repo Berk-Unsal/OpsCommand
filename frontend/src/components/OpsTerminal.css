@@ -1,0 +1,185 @@
+/* ===== OPS TERMINAL — RIGHT PANEL ===== */
+.ops-terminal {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  font-family: 'Fira Code', 'Consolas', 'Courier New', monospace;
+  overflow: hidden;
+}
+
+/* ---- Header ---- */
+.ops-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #2d2d2d;
+  padding: 6px 16px;
+  font-size: 12px;
+  color: #8a8a8a;
+  border-bottom: 1px solid #3c3c3c;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.ops-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ops-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.ops-dot.red { background-color: #ff5f56; }
+.ops-dot.yellow { background-color: #ffbd2e; }
+.ops-dot.green { background-color: #27c93f; }
+
+.ops-header-title {
+  color: #cccccc;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.ops-header-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.ops-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.ops-status-dot.online { background-color: #27c93f; }
+.ops-status-dot.offline { background-color: #ff5f56; }
+
+/* ---- Output area ---- */
+.ops-output {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ---- Welcome ---- */
+.ops-welcome {
+  color: #569cd6;
+  padding: 4px 0;
+  line-height: 1.65;
+}
+
+.ops-welcome.dim {
+  color: #6a6a6a;
+}
+
+/* ---- Log lines ---- */
+.ops-line {
+  padding: 1px 0;
+  line-height: 1.65;
+  word-break: break-word;
+}
+
+.ops-line.user-input .ops-prompt {
+  color: #00bcd4;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.ops-line.user-input .ops-text {
+  color: #ffffff;
+}
+
+.ops-line.bot-output .ops-text {
+  color: #d4d4d4;
+}
+
+/* Severity colours */
+.ops-line.msg-success .ops-text { color: #4ec9b0; }
+.ops-line.msg-error   .ops-text { color: #f44747; }
+.ops-line.msg-warning .ops-text { color: #ce9178; }
+.ops-line.msg-info    .ops-text { color: #d4d4d4; }
+
+/* Pre / code blocks */
+.ops-pre {
+  background-color: #2d2d2d;
+  border: 1px solid #3c3c3c;
+  border-radius: 0;
+  padding: 10px 14px;
+  margin: 4px 0 4px 20px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #cccccc;
+}
+
+/* ---- Input line ---- */
+.ops-input-area {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px 12px 16px;
+  background-color: #1e1e1e;
+  border-top: 1px solid #2d2d2d;
+  flex-shrink: 0;
+}
+
+.ops-input-prompt {
+  color: #00bcd4;
+  font-weight: 600;
+  margin-right: 8px;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.ops-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-family: 'Fira Code', 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  caret-color: transparent;
+  padding: 0;
+}
+
+.ops-input::placeholder {
+  color: #555555;
+  font-style: normal;
+}
+
+/* Blinking block cursor */
+.ops-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background-color: #d4d4d4;
+  animation: ops-blink 1s step-end infinite;
+  vertical-align: text-bottom;
+  margin-left: 1px;
+  flex-shrink: 0;
+}
+
+@keyframes ops-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.ops-input:focus ~ .ops-cursor {
+  animation: ops-blink 1s step-end infinite;
+}

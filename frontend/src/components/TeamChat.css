@@ -1,0 +1,198 @@
+/* ===== TEAM CHAT — LEFT PANEL ===== */
+.teamchat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #252526;
+  color: #d4d4d4;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+}
+
+/* ---- Header ---- */
+.teamchat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background-color: #2d2d2d;
+  border-bottom: 1px solid #3c3c3c;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.teamchat-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #cccccc;
+  letter-spacing: 0.3px;
+}
+
+.teamchat-status {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.teamchat-status.online {
+  background-color: rgba(39, 201, 63, 0.15);
+  color: #27c93f;
+}
+
+.teamchat-status.offline {
+  background-color: rgba(255, 95, 86, 0.15);
+  color: #ff5f56;
+}
+
+/* ---- Messages area ---- */
+.teamchat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.teamchat-empty {
+  text-align: center;
+  color: #6a6a6a;
+  margin-top: 40px;
+  font-size: 13px;
+}
+
+/* ---- Bubble rows ---- */
+.bubble-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 85%;
+}
+
+.bubble-row.me {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.bubble-row.them {
+  align-self: flex-start;
+}
+
+/* Avatar */
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.bubble-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bubble-sender {
+  font-size: 11px;
+  color: #8a8a8a;
+  padding-left: 8px;
+}
+
+/* Bubble */
+.bubble {
+  padding: 8px 12px;
+  border-radius: 16px;
+  line-height: 1.45;
+  word-break: break-word;
+  position: relative;
+}
+
+.bubble-me {
+  background-color: #0e639c;
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+}
+
+.bubble-them {
+  background-color: #333333;
+  color: #d4d4d4;
+  border-bottom-left-radius: 4px;
+}
+
+.bubble-text {
+  display: inline;
+}
+
+.bubble-time {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-left: 10px;
+  float: right;
+  margin-top: 4px;
+}
+
+.bubble-them .bubble-time {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* ---- Input area ---- */
+.teamchat-input-area {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  background-color: #2d2d2d;
+  border-top: 1px solid #3c3c3c;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.teamchat-input {
+  flex: 1;
+  background: #1e1e1e;
+  border: 1px solid #3c3c3c;
+  border-radius: 20px;
+  padding: 8px 14px;
+  color: #d4d4d4;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+}
+
+.teamchat-input:focus {
+  border-color: #0e639c;
+}
+
+.teamchat-input::placeholder {
+  color: #555555;
+}
+
+.teamchat-send {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: #0e639c;
+  color: #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.teamchat-send:hover {
+  background: #1177bb;
+}
+
+.teamchat-send:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
