@@ -17,6 +17,9 @@ rules:
 - apiGroups: [""] # The core Kubernetes API group
   resources: ["pods", "nodes", "pods/log"]
   verbs: ["get", "list"] # Read-only permissions!
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "patch"]
 
 ---
 # 3. The Assignment (Gluing them together)

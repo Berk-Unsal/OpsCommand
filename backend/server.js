@@ -11,6 +11,8 @@ const path = require('path');     // <-- Add this
 const kc = new k8s.KubeConfig();
 kc.loadFromCluster(); 
 const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+const k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
+const k8sObjectApi = k8s.KubernetesObjectApi.makeApiClient(kc);
 
 const app = express();
 const server = http.createServer(app);
@@ -21,11 +23,27 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// 1. Connect to MongoDB
+// 1. Connect to MongoDB with retry logic
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/opscommand';
-mongoose.connect(MONGO_URI)
-  .then(() => console.log('✅ Connected to MongoDB'))
-  .catch(err => console.error('❌ MongoDB Connection Error:', err));
+
+const connectWithRetry = async (retries = 5, delay = 3000) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await mongoose.connect(MONGO_URI);
+      console.log('✅ Connected to MongoDB');
+      return;
+    } catch (err) {
+      console.log(`⏳ MongoDB connection attempt ${i + 1}/${retries} failed, retrying in ${delay/1000}s...`);
+      if (i === retries - 1) {
+        console.error('❌ MongoDB Connection Error:', err);
+        return;
+      }
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+};
+
+connectWithRetry();
 
 // 2. Define the Message Schema
 const MessageSchema = new mongoose.Schema({
@@ -95,7 +113,7 @@ async function handleCommand(socket, data) {
     if (commands.has(commandName)) {
         const command = commands.get(commandName);
         // Execute the command, passing the data and our context tools
-        await command.execute(data, { socket, io, k8sApi, commands });
+        await command.execute(data, { socket, io, k8sApi, k8sAppsApi, k8sObjectApi, commands });
     } else {
         // Fallback for unknown commands
         socket.emit('receive_message', { 
