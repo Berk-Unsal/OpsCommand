@@ -14,6 +14,8 @@ const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 const k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
 const k8sObjectApi = k8s.KubernetesObjectApi.makeApiClient(kc);
 
+const authRoutes = require('./routes/auth');
+
 const app = express();
 const server = http.createServer(app);
 const PORT = 4000;
@@ -22,6 +24,9 @@ app.use(cors({
     origin: ["http://localhost:5173", "http://opscommand.local"]
 }));
 app.use(express.json());
+
+// Auth API routes
+app.use('/api/auth', authRoutes);
 
 // 1. Connect to MongoDB with retry logic
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/opscommand';
@@ -50,6 +55,7 @@ const MessageSchema = new mongoose.Schema({
   sender: String,
   text: String,
   type: { type: String, default: 'chat' }, // 'chat' or 'system'
+  channel: { type: String, default: 'chat' }, // 'chat' or 'ops'
   timestamp: { type: Date, default: Date.now }
 });
 const Message = mongoose.model('Message', MessageSchema);
@@ -77,26 +83,58 @@ for (const file of commandFiles) {
 io.on('connection', async (socket) => {
   console.log(`🔌 Connected: ${socket.id}`);
 
-  // TASK 2.3: Load History on Join
+  // Load chat history (team messages)
   try {
-    const history = await Message.find().sort({ timestamp: 1 }).limit(50);
-    socket.emit('load_history', history);
+    const chatHistory = await Message.find({ channel: 'chat' }).sort({ timestamp: 1 }).limit(50);
+    socket.emit('load_chat_history', chatHistory);
   } catch (err) {
-    console.error("Could not load history:", err);
+    console.error("Could not load chat history:", err);
   }
 
+  // Load ops history (command logs)
+  try {
+    const opsHistory = await Message.find({ channel: 'ops' }).sort({ timestamp: 1 }).limit(50);
+    socket.emit('load_ops_history', opsHistory);
+  } catch (err) {
+    console.error("Could not load ops history:", err);
+  }
+
+  // --- Team chat messages (left panel) ---
+  socket.on('team-message', async (data) => {
+    const newMessage = new Message({
+      sender: data.sender,
+      text: data.text,
+      type: 'chat',
+      channel: 'chat',
+    });
+    await newMessage.save();
+    io.emit('team-message', newMessage);
+  });
+
+  // --- Ops commands (right panel) ---
+  socket.on('ops-command', async (data) => {
+    // Echo the command input to the ops log for all clients
+    const echoMsg = new Message({
+      sender: data.sender,
+      text: data.text,
+      type: 'system',
+      channel: 'ops',
+    });
+    await echoMsg.save();
+    io.emit('ops-log', echoMsg);
+
+    // Execute the command
+    handleCommand(socket, data);
+  });
+
+  // --- Legacy: keep backward compat for any old clients ---
   socket.on('send_message', async (data) => {
-    // TASK 2.4: ChatOps Logic (Basic Version)
     if (data.text.startsWith('/')) {
         handleCommand(socket, data);
-        return; // Don't save commands to DB
+        return;
     }
-
-    // Normal Chat: Save to DB
     const newMessage = new Message(data);
     await newMessage.save();
-
-    // Broadcast to everyone
     io.emit('receive_message', newMessage);
   });
 
@@ -109,18 +147,30 @@ io.on('connection', async (socket) => {
 async function handleCommand(socket, data) {
     const commandName = data.text.split(' ')[0]; // Extract the command (e.g., "/status")
 
+    // Create an ops-aware context that emits to 'ops-log' instead of 'receive_message'
+    const opsSocket = {
+      emit: (event, payload) => {
+        if (event === 'receive_message') {
+          // Redirect to ops-log and persist
+          const opsMsg = { ...payload, channel: 'ops' };
+          new Message(opsMsg).save().catch(err => console.error('Failed to save ops msg:', err));
+          io.emit('ops-log', opsMsg);
+        } else {
+          socket.emit(event, payload);
+        }
+      },
+      id: socket.id,
+    };
+
     // Check if the command exists in our Map
     if (commands.has(commandName)) {
         const command = commands.get(commandName);
-        // Execute the command, passing the data and our context tools
-        await command.execute(data, { socket, io, k8sApi, k8sAppsApi, k8sObjectApi, commands });
+        // Execute the command, passing the data and our ops-aware context
+        await command.execute(data, { socket: opsSocket, io, k8sApi, k8sAppsApi, k8sObjectApi, commands });
     } else {
-        // Fallback for unknown commands
-        socket.emit('receive_message', { 
-            sender: 'OpsBot', 
-            text: `Unknown command: ${commandName}.`, 
-            type: 'system' 
-        });
+        const errorMsg = { sender: 'OpsBot', text: `Unknown command: ${commandName}.`, type: 'system', channel: 'ops' };
+        new Message(errorMsg).save().catch(err => console.error('Failed to save ops msg:', err));
+        io.emit('ops-log', errorMsg);
     }
 }
 
