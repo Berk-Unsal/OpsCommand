@@ -16,10 +16,10 @@ A collaborative DevOps command platform that combines team chat with real-time K
 
 ```
 ┌─────────────┐      WebSocket      ┌─────────────┐      K8s API     ┌──────────────┐
-│   React     │◄─────────────────────►│   Node.js   │◄─────────────────►│  Kubernetes  │
-│  Frontend   │      Socket.io       │   Backend   │   @kubernetes/   │   Cluster    │
-│   (Vite)    │                      │  (Express)  │   client-node    │              │
-└─────────────┘                      └─────────────┘                  └──────────────┘
+│   React     │◄────────────────────│   Node.js   │◄─────────────────│  Kubernetes  │
+│  Frontend   │      Socket.io      │   Backend   │   @kubernetes/   │   Cluster    │
+│   (Vite)    │                     │  (Express)  │   client-node    │              │
+└─────────────┘                     └─────────────┘                  └──────────────┘
                                             │
                                             │ Mongoose
                                             ▼
