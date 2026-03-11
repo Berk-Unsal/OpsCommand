@@ -1,10 +1,8 @@
-const k8s = require('@kubernetes/client-node');
-
 module.exports = {
     name: '/restart',
     description: 'Triggers a rollout restart for a specific deployment. Usage: /restart <deployment-name>',
     execute: async (data, context) => {
-        const { socket, k8sObjectApi } = context;
+        const { socket, k8sAppsApi } = context;
         
         // Split the message by spaces. [0] is "/restart", [1] is the deployment name
         const args = data.text.split(' ');
@@ -30,40 +28,26 @@ module.exports = {
         try {
             // Prepare the patch with the current ISO timestamp
             const restartedAt = new Date().toISOString();
-            const patch = {
-                spec: {
-                    template: {
-                        metadata: {
-                            annotations: {
-                                'kubectl.kubernetes.io/restartedAt': restartedAt
-                            }
-                        }
-                    }
-                }
-            };
+            // Read current deployment and update pod template annotation.
+            const current = await k8sAppsApi.readNamespacedDeployment({
+                name: deploymentName,
+                namespace
+            });
 
-            console.log(`[/restart] DEBUG: Calling patch with spec:`, JSON.stringify(patch));
+            const deployment = current?.body || current;
+            deployment.spec = deployment.spec || {};
+            deployment.spec.template = deployment.spec.template || {};
+            deployment.spec.template.metadata = deployment.spec.template.metadata || {};
+            deployment.spec.template.metadata.annotations = deployment.spec.template.metadata.annotations || {};
+            deployment.spec.template.metadata.annotations['kubectl.kubernetes.io/restartedAt'] = restartedAt;
 
-            // Apply the patch using KubernetesObjectApi with strategic merge patch
-            // This requires a full Kubernetes object spec
-            const deploymentSpec = {
-                apiVersion: 'apps/v1',
-                kind: 'Deployment',
-                metadata: {
-                    name: deploymentName,
-                    namespace: namespace
-                },
-                spec: patch.spec
-            };
+            console.log(`[/restart] DEBUG: Replacing deployment with restartedAt=${restartedAt}`);
 
-            await k8sObjectApi.patch(
-                deploymentSpec,
-                undefined,  // pretty
-                undefined,  // dryRun
-                undefined,  // fieldManager
-                undefined,  // force
-                k8s.PatchStrategy.StrategicMergePatch
-            );
+            await k8sAppsApi.replaceNamespacedDeployment({
+                name: deploymentName,
+                namespace,
+                body: deployment
+            });
 
             const botReply = `🔄 **Deployment restarted:** ${deploymentName}\nRollout restart triggered at ${restartedAt}`;
 

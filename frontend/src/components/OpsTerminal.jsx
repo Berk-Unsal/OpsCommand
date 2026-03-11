@@ -65,13 +65,16 @@ export default function OpsTerminal({ socket, isConnected, myId }) {
   useEffect(() => {
     const onOpsHistory = (history) => setLogs(history);
     const onOpsLog = (msg) => setLogs((prev) => [...prev, msg]);
+    const onClearTerminal = () => setLogs([]);
 
     socket.on('load_ops_history', onOpsHistory);
     socket.on('ops-log', onOpsLog);
+    socket.on('clear-ops-terminal', onClearTerminal);
 
     return () => {
       socket.off('load_ops_history', onOpsHistory);
       socket.off('ops-log', onOpsLog);
+      socket.off('clear-ops-terminal', onClearTerminal);
     };
   }, [socket]);
 

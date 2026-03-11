@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0', // Required for Docker container networking
-    allowedHosts: ['opscommand.local'] // This tells Vite to accept our Ingress traffic
+    // Keep ingress host support while also allowing direct local access.
+    allowedHosts: ['opscommand.local', 'localhost', '127.0.0.1', '.localhost']
   }
 })

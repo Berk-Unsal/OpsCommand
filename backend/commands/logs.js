@@ -23,7 +23,7 @@ module.exports = {
             const res = await k8sApi.readNamespacedPodLog({
                 name: podName,
                 namespace: 'default',
-                tailLines: 20 // Only grab the last 20 lines so we don't flood the chat
+                tailLines: 20
             });
             
             // In the new K8s SDK, 'res' is directly the raw log string

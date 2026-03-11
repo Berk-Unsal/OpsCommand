@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import axios from 'axios';
 import './ProfileSidebar.css';
+import { BACKEND_URL } from '../config/runtime';
 
-const API = import.meta.env.VITE_BACKEND_URL || 'http://opscommand.local';
+const API = BACKEND_URL;
 
 export default function ProfileSidebar({ user, token, onUpdate, onLogout, open, onClose }) {
   const [displayName, setDisplayName] = useState(user?.displayName || '');
