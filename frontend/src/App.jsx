@@ -6,8 +6,8 @@ import TeamChat from './components/TeamChat';
 import OpsTerminal from './components/OpsTerminal';
 import LoginScreen from './components/LoginScreen';
 import ProfileSidebar from './components/ProfileSidebar';
+import { BACKEND_URL } from './config/runtime';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://opscommand.local';
 const socket = io(BACKEND_URL, {
   transports: ['websocket'],
 });

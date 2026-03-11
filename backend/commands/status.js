@@ -6,7 +6,13 @@ module.exports = {
 
         try {
             const res = await k8sApi.listNamespacedPod({ namespace: 'default' });
-            const pods = res.items;
+
+            // Support both legacy and modern client-node response shapes.
+            const pods = Array.isArray(res?.items)
+                ? res.items
+                : Array.isArray(res?.body?.items)
+                    ? res.body.items
+                    : [];
             
             const total = pods.length;
             const running = pods.filter(p => p.status.phase === 'Running').length;
@@ -21,9 +27,10 @@ module.exports = {
             
         } catch (err) {
             console.error("K8s API Error in /status:", err);
+            const details = err?.response?.body?.message || err?.message || 'Unknown Kubernetes API error';
             socket.emit('receive_message', {
                 sender: 'OpsBot',
-                text: `🔴 API Error: Could not fetch cluster status. Check backend logs.`,
+                text: `🔴 API Error: Could not fetch cluster status. ${details}`,
                 type: 'system'
             });
         }

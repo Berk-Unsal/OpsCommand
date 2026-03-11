@@ -19,7 +19,7 @@ rules:
   verbs: ["get", "list"] # Read-only permissions!
 - apiGroups: ["apps"]
   resources: ["deployments"]
-  verbs: ["get", "patch"]
+  verbs: ["get", "patch", "update"]
 
 ---
 # 3. The Assignment (Gluing them together)

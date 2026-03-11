@@ -7,9 +7,22 @@ const k8s = require('@kubernetes/client-node');
 const fs = require('fs');         // <-- Add this
 const path = require('path');     // <-- Add this
 
-// Configure the client to use the ServiceAccount injected into the Pod
+// Configure Kubernetes client for both in-cluster and local development.
 const kc = new k8s.KubeConfig();
-kc.loadFromCluster(); 
+const hasInClusterEnv = Boolean(process.env.KUBERNETES_SERVICE_HOST && process.env.KUBERNETES_SERVICE_PORT);
+
+if (hasInClusterEnv) {
+  kc.loadFromCluster();
+  console.log('☸️  Kubernetes config: in-cluster');
+} else {
+  try {
+    kc.loadFromDefault();
+    console.log('☸️  Kubernetes config: local kubeconfig');
+  } catch (err) {
+    console.error('❌ Failed to load local kubeconfig for Kubernetes client:', err.message);
+  }
+}
+
 const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 const k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
 const k8sObjectApi = k8s.KubernetesObjectApi.makeApiClient(kc);
@@ -21,7 +34,11 @@ const server = http.createServer(app);
 const PORT = 4000;
 
 app.use(cors({
-    origin: ["http://localhost:5173", "http://opscommand.local"]
+    origin: [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'http://opscommand.local'
+    ]
 }));
 app.use(express.json());
 
@@ -122,6 +139,16 @@ io.on('connection', async (socket) => {
     });
     await echoMsg.save();
     io.emit('ops-log', echoMsg);
+
+    // Notify all clients who executed the command
+    const executionNotification = new Message({
+      sender: 'OpsBot',
+      text: `${data.sender} executed ${data.text} command`,
+      type: 'system',
+      channel: 'ops',
+    });
+    await executionNotification.save();
+    io.emit('ops-log', executionNotification);
 
     // Execute the command
     handleCommand(socket, data);

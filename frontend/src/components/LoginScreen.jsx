@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import axios from 'axios';
 import './LoginScreen.css';
+import { BACKEND_URL } from '../config/runtime';
 
-const API = import.meta.env.VITE_BACKEND_URL || 'http://opscommand.local';
+const API = BACKEND_URL;
 
 export default function LoginScreen({ onLogin }) {
   const [isRegistering, setIsRegistering] = useState(false);

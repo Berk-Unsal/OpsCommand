@@ -8,7 +8,6 @@ import './TeamChat.css';
 export default function TeamChat({ socket, isConnected, myId }) {
   const [messages, setMessages] = useState([]);
   const bottomRef = useRef(null);
-  const inputRef = useRef(null);
 
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -30,18 +29,6 @@ export default function TeamChat({ socket, isConnected, myId }) {
       socket.off('team-message', onMessage);
     };
   }, [socket]);
-
-  const handleSend = (e) => {
-    e.preventDefault();
-    const text = inputRef.current?.value?.trim();
-    if (!text) return;
-
-    socket.emit('team-message', {
-      text,
-      sender: 'Engineer-' + (myId?.substr(0, 4) || '????'),
-    });
-    inputRef.current.value = '';
-  };
 
   /** Derive initials from the sender name */
   const initials = (name) => {
@@ -101,22 +88,6 @@ export default function TeamChat({ socket, isConnected, myId }) {
         })}
         <div ref={bottomRef} />
       </div>
-
-      {/* Input */}
-      <form className="teamchat-input-area" onSubmit={handleSend}>
-        <input
-          ref={inputRef}
-          type="text"
-          className="teamchat-input"
-          placeholder={isConnected ? 'Message your team…' : 'disconnected'}
-          disabled={!isConnected}
-          autoComplete="off"
-          spellCheck={true}
-        />
-        <button type="submit" className="teamchat-send" disabled={!isConnected}>
-          &#10148;
-        </button>
-      </form>
     </div>
   );
 }

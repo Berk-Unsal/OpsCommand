@@ -15,3 +15,12 @@ manifests:
   rawYaml:
     # Apply everything in the k8s folder
     - k8s/*.yaml
+portForward:
+  - resourceType: service
+    resourceName: frontend-service
+    port: 5173
+    localPort: 5173
+  - resourceType: service
+    resourceName: backend-service
+    port: 4000
+    localPort: 4000
