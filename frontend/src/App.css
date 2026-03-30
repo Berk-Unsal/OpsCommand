@@ -93,34 +93,99 @@
   color: #e06c75;
 }
 
+.topbar-terminal-toggle {
+  border: 1px solid #3c3c3c;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+}
+
+.topbar-terminal-toggle:hover {
+  border-color: #4ec9b0;
+  color: #4ec9b0;
+}
+
 /* ---- Split Pane Row ---- */
 .split-pane {
   display: flex;
   flex: 1;
   min-height: 0; /* allow flex children to shrink */
+  position: relative;
 }
 
 .pane-left {
   width: 35%;
   min-width: 280px;
   flex-shrink: 0;
+  transition: width .28s ease, min-width .28s ease;
 }
 
 .pane-divider {
   width: 1px;
   background-color: #3c3c3c;
   flex-shrink: 0;
+  transition: width .2s ease, opacity .2s ease;
 }
 
 .pane-right {
   flex: 1;
   min-width: 0;
+  transition: flex-basis .28s ease, width .28s ease, opacity .2s ease;
 }
 
 .pane {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.split-pane.ops-collapsed .pane-left {
+  width: 100%;
+  min-width: 0;
+}
+
+.split-pane.ops-collapsed .pane-divider {
+  width: 0;
+  opacity: 0;
+}
+
+.split-pane.ops-collapsed .pane-right {
+  flex: 0 0 0;
+  width: 0;
+  min-width: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ops-restore-tab {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  letter-spacing: 1.2px;
+  border: 1px solid #3c3c3c;
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  background: #252526;
+  color: #4ec9b0;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 10px 6px;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.ops-restore-tab:hover {
+  background: #2d2d2d;
 }
 
 /* ===== UNIFIED INPUT BAR (bottom) ===== */

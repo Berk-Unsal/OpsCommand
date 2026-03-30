@@ -22,6 +22,19 @@ const UserSchema = new mongoose.Schema({
     required: true,
     minlength: 6,
   },
+  role: {
+    type: String,
+    enum: ['admin', 'engineer', 'viewer'],
+    default: 'engineer',
+  },
+  permissions: {
+    type: [String],
+    default: function () {
+      if (this.role === 'admin') return ['*'];
+      if (this.role === 'viewer') return ['/status', '/logs', '/visualize'];
+      return ['/status', '/logs', '/restart', '/visualize', '/userlist'];
+    },
+  },
   createdAt: {
     type: Date,
     default: Date.now,

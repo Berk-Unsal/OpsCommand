@@ -18,6 +18,7 @@ function App() {
   const [token, setToken] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [opsCollapsed, setOpsCollapsed] = useState(false);
 
   // ── Socket / UI state ───────────────────────────────────
   const [isConnected, setIsConnected] = useState(socket.connected);
@@ -64,14 +65,30 @@ function App() {
     };
   }, []);
 
-  // Keep the unified input focused
+  // Keep the unified input focused, but never steal focus from profile settings.
   useEffect(() => {
-    if (!user) return; // only when logged in
-    const refocus = () => setTimeout(() => inputRef.current?.focus(), 0);
+    if (!user || profileOpen) return;
+
+    const shouldSkipRefocus = (target) => {
+      if (!(target instanceof Element)) return false;
+
+      return Boolean(
+        target.closest('.profile-sidebar') ||
+        target.closest('.profile-overlay') ||
+        target.closest('.topbar-avatar-btn') ||
+        target.closest('input, textarea, select, button, [contenteditable="true"]')
+      );
+    };
+
+    const refocus = (event) => {
+      if (shouldSkipRefocus(event?.target)) return;
+      setTimeout(() => inputRef.current?.focus(), 0);
+    };
+
     refocus();
     window.addEventListener('click', refocus);
     return () => window.removeEventListener('click', refocus);
-  }, [user]);
+  }, [user, profileOpen]);
 
   // ── Auth callbacks ──────────────────────────────────────
   const handleLogin = (u, t) => {
@@ -147,10 +164,19 @@ function App() {
         <span className={`topbar-status ${isConnected ? 'online' : 'offline'}`}>
           {isConnected ? 'connected' : 'disconnected'}
         </span>
+        <button
+          type="button"
+          className="topbar-terminal-toggle"
+          onClick={() => setOpsCollapsed((prev) => !prev)}
+          title={opsCollapsed ? 'Open terminal' : 'Collapse terminal'}
+          aria-label={opsCollapsed ? 'Open terminal panel' : 'Collapse terminal panel'}
+        >
+          {opsCollapsed ? 'Show Terminal' : 'Hide Terminal'}
+        </button>
       </div>
 
       {/* ===== Split Pane ===== */}
-      <div className="split-pane">
+      <div className={`split-pane ${opsCollapsed ? 'ops-collapsed' : ''}`}>
         <div className="pane pane-left">
           <TeamChat socket={socket} isConnected={isConnected} myId={myId} />
         </div>
@@ -160,6 +186,18 @@ function App() {
         <div className="pane pane-right">
           <OpsTerminal socket={socket} isConnected={isConnected} myId={myId} />
         </div>
+
+        {opsCollapsed && (
+          <button
+            type="button"
+            className="ops-restore-tab"
+            onClick={() => setOpsCollapsed(false)}
+            aria-label="Re-open terminal panel"
+            title="Open terminal"
+          >
+            TERMINAL
+          </button>
+        )}
       </div>
 
       {/* ===== Unified Input Bar ===== */}
