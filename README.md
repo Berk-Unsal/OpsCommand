@@ -166,6 +166,8 @@ The OpsBot responds to slash commands in the terminal:
 | `/status` | Shows cluster status and pod count | `/status` |
 | `/logs` | Fetches the last 20 lines of pod logs | `/logs <pod-name>` |
 | `/restart` | Triggers a rollout restart for a deployment | `/restart <deployment-name>` |
+| `/visualize` | Shows ASCII health visualization for backend and pods | `/visualize` |
+| `/userlist` | Lists users and their permissions in ASCII table format | `/userlist` |
 
 ### Adding New Commands
 
@@ -202,7 +204,8 @@ ops-command/
 │   │   ├── help.js
 │   │   ├── logs.js
 │   │   ├── restart.js
-│   │   └── status.js
+│   │   ├── status.js
+│   │   └── visualize.js
 │   ├── config/             # Configuration files
 │   │   └── passport.js     # Authentication strategy
 │   ├── middleware/         # Express middleware
