@@ -73,7 +73,7 @@ A collaborative DevOps command platform that combines team chat with real-time K
 
 ### 1. Clone the Repository
 ```bash
-git clone <repository-url>
+git clone https://github.com/Berk-Unsal/OpsCommand/
 cd ops-command
 ```
 
