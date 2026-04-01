@@ -12,6 +12,16 @@ A collaborative DevOps command platform that combines team chat with real-time K
 - **Real-time Updates**: WebSocket-powered instant communication
 - **Message Persistence**: MongoDB-backed chat and ops history
 
+## Screenshots
+
+### Operations View
+
+![OpsCommand Operations View](assets/operations.png)
+
+### Dashboard View
+
+![OpsCommand Dashboard View](assets/dashboard.png)
+
 ## Architecture
 
 ```
