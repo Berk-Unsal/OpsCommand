@@ -28,6 +28,8 @@ const k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
 const k8sObjectApi = k8s.KubernetesObjectApi.makeApiClient(kc);
 
 const authRoutes = require('./routes/auth');
+const { verifyToken } = require('./routes/auth');
+const User = require('./models/User');
 
 const app = express();
 const server = http.createServer(app);
@@ -44,6 +46,74 @@ app.use(express.json());
 
 // Auth API routes
 app.use('/api/auth', authRoutes);
+
+function normalizePodListResponse(res) {
+  if (Array.isArray(res?.items)) return res.items;
+  if (Array.isArray(res?.body?.items)) return res.body.items;
+  return [];
+}
+
+function getWorkloadKey(pod) {
+  const appLabel = String(pod?.metadata?.labels?.app || '').toLowerCase();
+  if (appLabel === 'backend') return 'ops-backend';
+  if (appLabel === 'frontend') return 'ops-frontend';
+  if (appLabel === 'mongo') return 'ops-mongo';
+
+  const podName = String(pod?.metadata?.name || '').toLowerCase();
+  if (podName.includes('backend')) return 'ops-backend';
+  if (podName.includes('frontend')) return 'ops-frontend';
+  if (podName.includes('mongo')) return 'ops-mongo';
+  return null;
+}
+
+function authFromBearer(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No token provided.' });
+  }
+
+  try {
+    req.authUser = verifyToken(authHeader.split(' ')[1]);
+    return next();
+  } catch {
+    return res.status(401).json({ error: 'Invalid or expired token.' });
+  }
+}
+
+app.get('/api/dashboard/overview', authFromBearer, async (req, res) => {
+  try {
+    const podRes = await k8sApi.listNamespacedPod({ namespace: 'default' });
+    const pods = normalizePodListResponse(podRes);
+
+    const runningByService = {
+      'ops-backend': 0,
+      'ops-frontend': 0,
+      'ops-mongo': 0,
+    };
+
+    for (const pod of pods) {
+      if (pod?.status?.phase !== 'Running') continue;
+      const workloadKey = getWorkloadKey(pod);
+      if (workloadKey) {
+        runningByService[workloadKey] += 1;
+      }
+    }
+
+    const users = await User.find({}, 'username displayName role createdAt')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json({
+      runningByService,
+      users,
+      fetchedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error('Dashboard API error:', err);
+    const details = err?.response?.body?.message || err?.message || 'Unknown error';
+    res.status(500).json({ error: `Could not fetch dashboard overview. ${details}` });
+  }
+});
 
 // 1. Connect to MongoDB with retry logic
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/opscommand';

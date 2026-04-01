@@ -93,6 +93,35 @@
   color: #e06c75;
 }
 
+.topbar-view-switch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.topbar-view-btn {
+  border: 1px solid #3b4b60;
+  background: #1a2434;
+  color: #9eb5cf;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .35px;
+  cursor: pointer;
+}
+
+.topbar-view-btn.active {
+  border-color: #31c48d;
+  color: #31c48d;
+  background: #12271f;
+}
+
+.topbar-view-btn:hover {
+  border-color: #4d6785;
+  color: #d7e6f7;
+}
+
 .topbar-terminal-toggle {
   border: 1px solid #3c3c3c;
   background: #1e1e1e;
@@ -109,6 +138,11 @@
 .topbar-terminal-toggle:hover {
   border-color: #4ec9b0;
   color: #4ec9b0;
+}
+
+.topbar-terminal-toggle:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
 /* ---- Split Pane Row ---- */

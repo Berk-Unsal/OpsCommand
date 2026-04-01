@@ -4,6 +4,7 @@ import axios from 'axios';
 import './App.css';
 import TeamChat from './components/TeamChat';
 import OpsTerminal from './components/OpsTerminal';
+import Dashboard from './components/Dashboard';
 import LoginScreen from './components/LoginScreen';
 import ProfileSidebar from './components/ProfileSidebar';
 import { BACKEND_URL } from './config/runtime';
@@ -19,6 +20,7 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [profileOpen, setProfileOpen] = useState(false);
   const [opsCollapsed, setOpsCollapsed] = useState(false);
+  const [activePage, setActivePage] = useState('operations');
 
   // ── Socket / UI state ───────────────────────────────────
   const [isConnected, setIsConnected] = useState(socket.connected);
@@ -164,71 +166,94 @@ function App() {
         <span className={`topbar-status ${isConnected ? 'online' : 'offline'}`}>
           {isConnected ? 'connected' : 'disconnected'}
         </span>
+        <div className="topbar-view-switch">
+          <button
+            type="button"
+            className={`topbar-view-btn ${activePage === 'operations' ? 'active' : ''}`}
+            onClick={() => setActivePage('operations')}
+          >
+            Operations
+          </button>
+          <button
+            type="button"
+            className={`topbar-view-btn ${activePage === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setActivePage('dashboard')}
+          >
+            Dashboard
+          </button>
+        </div>
         <button
           type="button"
           className="topbar-terminal-toggle"
           onClick={() => setOpsCollapsed((prev) => !prev)}
           title={opsCollapsed ? 'Open terminal' : 'Collapse terminal'}
           aria-label={opsCollapsed ? 'Open terminal panel' : 'Collapse terminal panel'}
+          disabled={activePage !== 'operations'}
         >
           {opsCollapsed ? 'Show Terminal' : 'Hide Terminal'}
         </button>
       </div>
 
-      {/* ===== Split Pane ===== */}
-      <div className={`split-pane ${opsCollapsed ? 'ops-collapsed' : ''}`}>
-        <div className="pane pane-left">
-          <TeamChat socket={socket} isConnected={isConnected} myId={myId} />
-        </div>
+      {activePage === 'operations' ? (
+        <>
+          {/* ===== Split Pane ===== */}
+          <div className={`split-pane ${opsCollapsed ? 'ops-collapsed' : ''}`}>
+            <div className="pane pane-left">
+              <TeamChat socket={socket} isConnected={isConnected} myId={myId} />
+            </div>
 
-        <div className="pane-divider" />
+            <div className="pane-divider" />
 
-        <div className="pane pane-right">
-          <OpsTerminal socket={socket} isConnected={isConnected} myId={myId} />
-        </div>
+            <div className="pane pane-right">
+              <OpsTerminal socket={socket} isConnected={isConnected} myId={myId} />
+            </div>
 
-        {opsCollapsed && (
-          <button
-            type="button"
-            className="ops-restore-tab"
-            onClick={() => setOpsCollapsed(false)}
-            aria-label="Re-open terminal panel"
-            title="Open terminal"
-          >
-            TERMINAL
-          </button>
-        )}
-      </div>
+            {opsCollapsed && (
+              <button
+                type="button"
+                className="ops-restore-tab"
+                onClick={() => setOpsCollapsed(false)}
+                aria-label="Re-open terminal panel"
+                title="Open terminal"
+              >
+                TERMINAL
+              </button>
+            )}
+          </div>
 
-      {/* ===== Unified Input Bar ===== */}
-      <form className="unified-input" onSubmit={handleSend}>
-        <span className={`input-mode-badge ${isCommand ? 'cmd' : 'chat'}`}>
-          {isCommand ? 'CMD' : 'CHAT'}
-        </span>
-        <input
-          ref={inputRef}
-          type="text"
-          className={`unified-input-field ${isCommand ? 'cmd' : 'chat'}`}
-          value={messageInput}
-          onChange={(e) => setMessageInput(e.target.value)}
-          placeholder={
-            isConnected
-              ? 'Type a message or /command…'
-              : 'disconnected...'
-          }
-          disabled={!isConnected}
-          autoFocus
-          spellCheck={false}
-          autoComplete="off"
-        />
-        <button
-          type="submit"
-          className={`unified-send ${isCommand ? 'cmd' : 'chat'}`}
-          disabled={!isConnected}
-        >
-          {isCommand ? '▶' : '➤'}
-        </button>
-      </form>
+          {/* ===== Unified Input Bar ===== */}
+          <form className="unified-input" onSubmit={handleSend}>
+            <span className={`input-mode-badge ${isCommand ? 'cmd' : 'chat'}`}>
+              {isCommand ? 'CMD' : 'CHAT'}
+            </span>
+            <input
+              ref={inputRef}
+              type="text"
+              className={`unified-input-field ${isCommand ? 'cmd' : 'chat'}`}
+              value={messageInput}
+              onChange={(e) => setMessageInput(e.target.value)}
+              placeholder={
+                isConnected
+                  ? 'Type a message or /command…'
+                  : 'disconnected...'
+              }
+              disabled={!isConnected}
+              autoFocus
+              spellCheck={false}
+              autoComplete="off"
+            />
+            <button
+              type="submit"
+              className={`unified-send ${isCommand ? 'cmd' : 'chat'}`}
+              disabled={!isConnected}
+            >
+              {isCommand ? '▶' : '➤'}
+            </button>
+          </form>
+        </>
+      ) : (
+        <Dashboard token={token} />
+      )}
     </div>
   );
 }
