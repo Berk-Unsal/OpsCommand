@@ -208,49 +208,73 @@ module.exports = {
 ## Project Structure
 
 ```
-ops-command/
-├── backend/                 # Node.js backend application
-│   ├── commands/           # OpsBot command plugins
+OpsCommand/
+├── assets/                     # README screenshots
+│   ├── dashboard.png
+│   └── operations.png
+├── backend/                    # Node.js backend application
+│   ├── commands/               # OpsBot command plugins
+│   │   ├── clear.js
 │   │   ├── help.js
 │   │   ├── logs.js
 │   │   ├── restart.js
 │   │   ├── status.js
+│   │   ├── userlist.js
 │   │   └── visualize.js
-│   ├── config/             # Configuration files
-│   │   └── passport.js     # Authentication strategy
-│   ├── middleware/         # Express middleware
-│   │   └── auth.js         # JWT authentication
-│   ├── models/             # Mongoose models
-│   │   └── User.js         # User schema
-│   ├── routes/             # Express routes
-│   │   └── auth.js         # Auth endpoints
-│   ├── server.js           # Main server file
+│   ├── config/
+│   │   └── passport.js
+│   ├── middleware/
+│   │   └── auth.js
+│   ├── models/
+│   │   └── User.js
+│   ├── routes/
+│   │   └── auth.js
 │   ├── Dockerfile
-│   └── package.json
-├── frontend/               # React frontend application
+│   ├── package.json
+│   └── server.js
+├── frontend/                   # React frontend (Vite)
+│   ├── public/
+│   │   └── vite.svg
 │   ├── src/
-│   │   ├── components/     # React components
+│   │   ├── assets/
+│   │   │   └── react.svg
+│   │   ├── components/
+│   │   │   ├── Dashboard.css
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── LoginScreen.css
 │   │   │   ├── LoginScreen.jsx
+│   │   │   ├── OpsTerminal.css
 │   │   │   ├── OpsTerminal.jsx
+│   │   │   ├── ProfileSidebar.css
 │   │   │   ├── ProfileSidebar.jsx
+│   │   │   ├── TeamChat.css
 │   │   │   └── TeamChat.jsx
-│   │   ├── App.jsx         # Main app component
-│   │   └── main.jsx        # Entry point
+│   │   ├── config/
+│   │   │   └── runtime.js
+│   │   ├── App.css
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   └── main.jsx
 │   ├── Dockerfile
-│   ├── vite.config.js
-│   └── package.json
-├── k8s/                    # Kubernetes manifests
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package.json
+│   ├── README.md
+│   └── vite.config.js
+├── k8s/                        # Kubernetes manifests
 │   ├── backend.yaml
-│   ├── frontend.yaml
-│   ├── mongo.yaml
-│   ├── ingress.yaml
 │   ├── configmap.yaml
-│   ├── secret.yaml
-│   └── rbac.yaml
-├── docker-compose.yml      # Local development setup
-├── skaffold.yaml          # Skaffold configuration
-├── kind-config.yaml       # Kind cluster configuration
-└── README.md              # This file
+│   ├── frontend.yaml
+│   ├── ingress.yaml
+│   ├── mongo.yaml
+│   ├── rbac.yaml
+│   └── secret.yaml
+├── docker-compose.yml
+├── kind-config.yaml
+├── requirements.md
+├── skaffold.yaml
+├── system_modeling.md
+└── README.md
 ```
 
 ## Security
