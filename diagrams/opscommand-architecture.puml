@@ -1,0 +1,142 @@
+@startuml
+title OpsCommand Detailed System Architecture
+
+left to right direction
+skinparam shadowing false
+skinparam roundcorner 16
+skinparam backgroundColor #ffffff
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+skinparam ArrowColor #4b5563
+skinparam ArrowThickness 1.5
+skinparam NoteBackgroundColor #fff8dc
+skinparam NoteBorderColor #d97706
+
+actor "Engineer" as Engineer
+node "Web Browser" as Browser
+
+package "Access Layer" {
+  component "NGINX Ingress\nopscommand.local" as Ingress <<ingress>>
+  component "Frontend Service\nClusterIP / NodePort" as FrontendService <<service>>
+  component "Backend Service\nClusterIP" as BackendService <<service>>
+}
+
+package "Client Experience\n(React + Vite)" as FE {
+  component "App Shell\nAuth gate + page switching" as AppShell <<ui>>
+  component "Authentication View\nLogin / Register" as LoginScreen <<ui>>
+  component "Operations View\nTeam Chat + Ops Terminal" as OperationsView <<ui>>
+  component "Dashboard View\nCluster overview + users" as DashboardView <<ui>>
+  component "Profile Sidebar\nDisplay name + password" as ProfileSidebar <<ui>>
+  component "runtime.js\nBACKEND_URL resolution" as RuntimeConfig <<config>>
+}
+
+package "Application Services\n(Node.js + Express + Socket.io)" as BE {
+  component "server.js\nHTTP + Socket.io bootstrap" as Server <<service>>
+  component "Auth API\n/register /login /me /profile" as AuthRoutes <<route>>
+  component "Session Guard\nBearer validation" as AuthMiddleware <<route>>
+  component "Dashboard API\n/api/dashboard/overview" as DashboardAPI <<route>>
+  component "Realtime Hub\nteam-message / ops-command" as SocketHub <<service>>
+  component "Command Dispatcher\nhandleCommand()" as Dispatcher <<service>>
+  component "Command Registry\n/backend/commands/*.js" as CommandRegistry <<service>>
+  component "Persistence Layer\nMongoose + Models" as Persistence <<service>>
+  component "Kubernetes Adapter\n@kubernetes/client-node" as K8sClient <<service>>
+}
+
+package "Command Plugins" as Commands {
+  component "Built-in Ops Commands" as BuiltInCommands <<command>>
+}
+
+package "Data & Control Plane" as Infra {
+  database "MongoDB\nUser + Message collections" as MongoDB <<database>>
+  component "Kubernetes API Server" as KubeAPI <<control>>
+  component "ServiceAccount\nopsbot-sa" as ServiceAccount <<identity>>
+  component "Role + RoleBinding\nRead pods/logs, update deployments" as RBAC <<rbac>>
+  component "Frontend Pod\nReact + Vite" as FrontendPod <<pod>>
+  component "Backend Pod\nNode.js + Express + Socket.io" as BackendPod <<pod>>
+  component "MongoDB Pod\nPersistent data store" as MongoPod <<pod>>
+}
+
+Engineer --> Browser : uses UI
+Browser --> Ingress : HTTP / HTTPS
+Ingress --> FrontendService : routes /
+Ingress --> BackendService : routes /api and /socket.io
+
+Browser --> RuntimeConfig : resolves backend URL
+RuntimeConfig --> Server : REST + WebSocket target
+Browser --> AppShell : loads SPA
+AppShell --> LoginScreen : unauthenticated state
+AppShell --> OperationsView : chat + terminal workspace
+AppShell --> DashboardView : cluster summary
+AppShell --> ProfileSidebar : profile edits
+
+FrontendService --> FrontendPod
+BackendService --> BackendPod
+FrontendPod --> AppShell
+
+Server --> AuthRoutes : mounts /api/auth
+Server --> AuthMiddleware : validates bearer tokens
+Server --> DashboardAPI : serves overview endpoint
+Server --> SocketHub : attaches Socket.io listeners
+Server --> Persistence : connects to MongoDB and models
+Server --> K8sClient : loads in-cluster or kubeconfig
+Server --> CommandRegistry : loads command modules at startup
+Server --> Dispatcher : routes slash commands
+
+Persistence --> MongoDB : users and messages
+K8sClient --> KubeAPI : CoreV1Api / AppsV1Api / KubernetesObjectApi
+
+ServiceAccount --> RBAC : bound to
+BackendPod --> ServiceAccount : runs as
+BackendPod --> KubeAPI : authenticated API calls
+
+AuthRoutes --> Persistence : register / login / me / profile
+DashboardAPI --> Persistence : fetch users
+DashboardAPI --> K8sClient : list pods
+SocketHub --> Persistence : persist chat + ops messages
+SocketHub --> Browser : broadcast events
+
+CommandRegistry --> BuiltInCommands : groups
+BuiltInCommands --> Dispatcher : /help /status /logs /restart /visualize /userlist
+Dispatcher --> K8sClient : /status /logs /restart /visualize
+Dispatcher --> Persistence : /userlist
+Dispatcher --> CommandRegistry : /help enumerates registry
+
+OperationsView --> SocketHub : emits team-message and ops-command
+ProfileSidebar --> AuthRoutes : PUT /api/auth/profile
+LoginScreen --> AuthRoutes : POST /api/auth/login and /register
+DashboardView --> DashboardAPI : GET /api/dashboard/overview
+
+note right of SocketHub
+  Real-time flow, grouped:
+  - Team chat: save message then broadcast team-message
+  - Ops terminal: echo command, emit execution notice, execute plugin, broadcast ops-log
+  - On connect: load chat history and ops history
+end note
+
+note bottom of CommandRegistry
+  Commands are plugin-based, but grouped by dependency:
+  - /help inspects the registry itself
+  - /status, /logs, /restart, /visualize use Kubernetes
+  - /userlist reads from MongoDB
+end note
+
+note bottom of DashboardAPI
+  Dashboard grouping:
+  - counts Running pods for ops-backend, ops-frontend, ops-mongo
+  - returns registered users sorted by createdAt
+end note
+
+legend right
+  |= Layer |= Meaning |
+  | <<ui>> | React UI component |
+  | <<route>> | Express route / middleware |
+  | <<service>> | Runtime service / orchestration |
+  | <<command>> | Slash-command plugin |
+  | <<model>> | Mongoose schema/model |
+  | <<api>> | Kubernetes client API |
+  | <<pod>> | Deployed workload |
+  | <<rbac>> | Access control resource |
+endlegend
+
+@enduml
