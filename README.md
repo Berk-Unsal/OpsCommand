@@ -56,6 +56,8 @@ A collaborative DevOps command platform that combines team chat with real-time K
 
 ### Infrastructure
 - **MongoDB 6.0** - Message persistence
+- **Prometheus** - Metrics collection and alerting
+- **Grafana** - Metrics dashboards and visualization
 - **Kubernetes** - Container orchestration
 - **Docker** - Containerization
 - **Skaffold** - Development workflow automation
@@ -117,6 +119,60 @@ This starts:
 - Frontend on http://localhost:5173
 - Backend on http://localhost:4000
 - MongoDB on localhost:27017
+- Prometheus on http://localhost:9090
+- Grafana on http://localhost:3000
+- Node Exporter on localhost:9100 (for system/host metrics)
+
+### Monitoring Stack
+
+The backend exposes Prometheus metrics at:
+
+- `GET http://localhost:4000/metrics`
+
+Included custom metrics:
+
+- `opscommand_commands_total{status="success|error"}`
+- `opscommand_command_duration_seconds` (histogram)
+
+Included default Node.js/process metrics (via `prom-client`):
+
+- CPU usage (process CPU seconds)
+- memory usage (resident/heap)
+- event loop lag and process/runtime metrics
+
+Prometheus is preconfigured to scrape the app every 5 seconds.
+
+Grafana is preconfigured with:
+
+- Prometheus data source
+- `OpsCommand Monitoring` dashboard
+    - command rate
+    - error rate
+    - p95 latency
+
+Default Grafana credentials:
+
+- username: `admin`
+- password: `admin`
+
+Example PromQL queries:
+
+```promql
+# Command rate (commands per second)
+sum(rate(opscommand_commands_total[1m]))
+
+# Error rate (%)
+100 * sum(rate(opscommand_commands_total{status="error"}[5m]))
+    / clamp_min(sum(rate(opscommand_commands_total[5m])), 0.001)
+
+# Command latency p95 (seconds)
+histogram_quantile(0.95, sum(rate(opscommand_command_duration_seconds_bucket[5m])) by (le))
+```
+
+Alert rules are included in Prometheus for:
+
+- High command error rate
+- High p95 command latency
 
 ### Kubernetes Development (Skaffold)
 

@@ -1,0 +1,25 @@
+groups:
+  - name: opscommand-alerts
+    rules:
+      - alert: OpsCommandHighErrorRate
+        expr: |
+          sum(rate(opscommand_commands_total{status="error"}[5m]))
+          /
+          clamp_min(sum(rate(opscommand_commands_total[5m])), 0.001)
+          > 0.2
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "OpsCommand command error rate is high"
+          description: "More than 20% of commands have failed during the last 5 minutes."
+
+      - alert: OpsCommandHighP95Latency
+        expr: |
+          histogram_quantile(0.95, sum(rate(opscommand_command_duration_seconds_bucket[5m])) by (le)) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "OpsCommand p95 command latency is high"
+          description: "The 95th percentile command execution latency has exceeded 1 second."

@@ -4,6 +4,7 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const k8s = require('@kubernetes/client-node');
+const client = require('prom-client');
 const fs = require('fs');         // <-- Add this
 const path = require('path');     // <-- Add this
 
@@ -35,6 +36,24 @@ const app = express();
 const server = http.createServer(app);
 const PORT = 4000;
 
+// Prometheus metrics registry
+const register = new client.Registry();
+client.collectDefaultMetrics({ register });
+
+const commandCounter = new client.Counter({
+  name: 'opscommand_commands_total',
+  help: 'Total number of OpsCommand commands executed',
+  labelNames: ['status'],
+  registers: [register],
+});
+
+const commandDurationHistogram = new client.Histogram({
+  name: 'opscommand_command_duration_seconds',
+  help: 'Duration of OpsCommand command execution in seconds',
+  buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5],
+  registers: [register],
+});
+
 app.use(cors({
     origin: [
       'http://localhost:5173',
@@ -43,6 +62,15 @@ app.use(cors({
     ]
 }));
 app.use(express.json());
+
+app.get('/metrics', async (req, res) => {
+  try {
+    res.set('Content-Type', register.contentType);
+    res.end(await register.metrics());
+  } catch (err) {
+    res.status(500).end(err.message);
+  }
+});
 
 // Auth API routes
 app.use('/api/auth', authRoutes);
@@ -243,6 +271,7 @@ io.on('connection', async (socket) => {
 // Helper for Commands
 async function handleCommand(socket, data) {
     const commandName = data.text.split(' ')[0]; // Extract the command (e.g., "/status")
+  const endTimer = commandDurationHistogram.startTimer();
 
     // Create an ops-aware context that emits to 'ops-log' instead of 'receive_message'
     const opsSocket = {
@@ -262,12 +291,30 @@ async function handleCommand(socket, data) {
     // Check if the command exists in our Map
     if (commands.has(commandName)) {
         const command = commands.get(commandName);
-        // Execute the command, passing the data and our ops-aware context
-        await command.execute(data, { socket: opsSocket, io, k8sApi, k8sAppsApi, k8sObjectApi, commands });
+        try {
+          // Execute the command, passing the data and our ops-aware context
+          await command.execute(data, { socket: opsSocket, io, k8sApi, k8sAppsApi, k8sObjectApi, commands });
+          commandCounter.inc({ status: 'success' });
+        } catch (err) {
+          commandCounter.inc({ status: 'error' });
+          const errorMsg = {
+            sender: 'OpsBot',
+            text: `Command failed: ${commandName}. ${err?.message || 'Unexpected error.'}`,
+            type: 'system',
+            channel: 'ops',
+          };
+          new Message(errorMsg).save().catch(saveErr => console.error('Failed to save ops msg:', saveErr));
+          io.emit('ops-log', errorMsg);
+          console.error(`Command execution error for ${commandName}:`, err);
+        } finally {
+          endTimer();
+        }
     } else {
+        commandCounter.inc({ status: 'error' });
         const errorMsg = { sender: 'OpsBot', text: `Unknown command: ${commandName}.`, type: 'system', channel: 'ops' };
         new Message(errorMsg).save().catch(err => console.error('Failed to save ops msg:', err));
         io.emit('ops-log', errorMsg);
+        endTimer();
     }
 }
 
