@@ -110,6 +110,7 @@ The application uses the following environment variables:
 ### GitHub Pages Demo App
 
 A static demo app is available in `docs/` and auto-deploys through GitHub Actions.
+For branch-based GitHub Pages mode, root `index.html` redirects to `docs/` so the demo opens by default.
 
 Files:
 - `docs/index.html`
