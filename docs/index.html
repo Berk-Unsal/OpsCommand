@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpsCommand Demo</title>
+    <meta name="description" content="OpsCommand demo app on GitHub Pages" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-a"></div>
+    <div class="bg-orb orb-b"></div>
+
+    <header class="hero shell">
+      <p class="eyebrow">Realtime DevOps Collaboration</p>
+      <h1>OpsCommand Demo</h1>
+      <p class="subtitle">
+        Team chat and operational slash commands in one flow. This static demo reflects the
+        live project architecture with a simulated command terminal.
+      </p>
+      <div class="cta-row">
+        <a class="btn solid" href="../README.md">Read Documentation</a>
+        <a class="btn ghost" href="https://github.com/" target="_blank" rel="noreferrer">View Repository</a>
+      </div>
+    </header>
+
+    <main class="shell">
+      <section class="panel reveal">
+        <h2>How It Works</h2>
+        <div class="arch-grid">
+          <article>
+            <h3>Frontend</h3>
+            <p>React + Vite UI with chat panel, ops terminal, and dashboard.</p>
+          </article>
+          <article>
+            <h3>Backend</h3>
+            <p>Express + Socket.io API with dynamic command execution modules.</p>
+          </article>
+          <article>
+            <h3>Cluster</h3>
+            <p>Kubernetes operations through official Node.js client integration.</p>
+          </article>
+          <article>
+            <h3>Observability</h3>
+            <p>Prometheus metrics and Grafana dashboards for rate, errors, and latency.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel terminal-panel reveal">
+        <div class="terminal-head">
+          <h2>Command Simulator</h2>
+          <span class="blink"></span>
+        </div>
+        <p class="terminal-note">A lightweight simulation of slash command execution flow.</p>
+        <div class="terminal" id="terminal" aria-live="polite"></div>
+      </section>
+
+      <section class="metrics reveal">
+        <article class="metric-card">
+          <h3>Command Rate</h3>
+          <p class="metric-value" id="rate">0.00 cmd/s</p>
+        </article>
+        <article class="metric-card">
+          <h3>Error Rate</h3>
+          <p class="metric-value" id="errors">0.0%</p>
+        </article>
+        <article class="metric-card">
+          <h3>p95 Latency</h3>
+          <p class="metric-value" id="p95">0.000s</p>
+        </article>
+      </section>
+    </main>
+
+    <footer class="shell foot">
+      <p>OpsCommand Demo on GitHub Pages</p>
+    </footer>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,251 @@
+:root {
+  --bg: #0b1515;
+  --bg-soft: #102225;
+  --panel: rgba(12, 30, 33, 0.72);
+  --ink: #e7fffa;
+  --muted: #9ec9c2;
+  --accent: #1cd9a8;
+  --accent-2: #ffb347;
+  --line: rgba(136, 200, 187, 0.25);
+  --shadow: 0 20px 80px rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 900px at 90% -20%, #214642 0%, transparent 60%),
+    radial-gradient(900px 700px at -10% 110%, #332916 0%, transparent 65%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-soft) 100%);
+  font-family: "Space Grotesk", sans-serif;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+.shell {
+  width: min(1100px, 92vw);
+  margin: 0 auto;
+}
+
+.bg-orb {
+  position: fixed;
+  z-index: -1;
+  border-radius: 999px;
+  filter: blur(70px);
+  opacity: 0.22;
+}
+
+.orb-a {
+  width: 320px;
+  height: 320px;
+  background: #5ef5ca;
+  top: 8%;
+  left: -100px;
+}
+
+.orb-b {
+  width: 280px;
+  height: 280px;
+  background: #ffd38a;
+  bottom: 6%;
+  right: -80px;
+}
+
+.hero {
+  padding: 5.5rem 0 2.5rem;
+}
+
+.eyebrow {
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  font-size: 0.82rem;
+}
+
+h1 {
+  margin: 0.25rem 0 0.8rem;
+  font-size: clamp(2rem, 6vw, 4rem);
+  line-height: 1.02;
+}
+
+.subtitle {
+  max-width: 65ch;
+  color: var(--muted);
+}
+
+.cta-row {
+  margin-top: 1.3rem;
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.btn.solid {
+  background: linear-gradient(135deg, var(--accent), #16c29a);
+  color: #07261f;
+  border: none;
+  font-weight: 700;
+}
+
+.btn.ghost {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.panel {
+  margin-top: 1.1rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 1.1rem;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(6px);
+}
+
+.arch-grid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.arch-grid article {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--line);
+  padding: 0.8rem;
+}
+
+.arch-grid h3 {
+  margin: 0 0 0.25rem;
+}
+
+.arch-grid p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.terminal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.terminal-note {
+  margin-top: 0.3rem;
+  color: var(--muted);
+}
+
+.terminal {
+  margin-top: 0.8rem;
+  border-radius: 14px;
+  border: 1px solid rgba(130, 187, 174, 0.35);
+  background: rgba(1, 10, 11, 0.74);
+  min-height: 220px;
+  padding: 0.8rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}
+
+.blink {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #5ef5ca;
+  box-shadow: 0 0 0 0 rgba(94, 245, 202, 0.6);
+  animation: pulse 1.8s infinite;
+}
+
+.metrics {
+  margin: 1rem 0 2rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.metric-card {
+  background: rgba(11, 30, 30, 0.66);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.8rem;
+}
+
+.metric-card h3 {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.metric-value {
+  margin: 0.35rem 0 0;
+  font-size: 1.45rem;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.foot {
+  padding: 0 0 2rem;
+  color: var(--muted);
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: rise 600ms ease forwards;
+}
+
+.reveal:nth-of-type(2) {
+  animation-delay: 90ms;
+}
+
+.reveal:nth-of-type(3) {
+  animation-delay: 160ms;
+}
+
+@keyframes rise {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(94, 245, 202, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 9px rgba(94, 245, 202, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(94, 245, 202, 0);
+  }
+}
+
+@media (max-width: 860px) {
+  .arch-grid,
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    padding-top: 4.2rem;
+  }
+}

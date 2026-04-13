@@ -107,6 +107,33 @@ The application uses the following environment variables:
 
 ## Development
 
+### GitHub Pages Demo App
+
+A static demo app is available in `docs/` and auto-deploys through GitHub Actions.
+
+Files:
+- `docs/index.html`
+- `docs/styles.css`
+- `docs/app.js`
+- `.github/workflows/deploy-pages.yml`
+
+How to publish:
+1. Push to `main`.
+2. In GitHub repository settings, open **Pages**.
+3. Set **Source** to **GitHub Actions**.
+4. Wait for workflow **Deploy Demo to GitHub Pages** to finish.
+
+Your demo URL will be:
+`https://<your-github-username>.github.io/<your-repository-name>/`
+
+Local preview:
+```bash
+python3 -m http.server 8080 --directory docs
+```
+
+Then open:
+`http://localhost:8080`
+
 ### Local Development (Docker Compose)
 
 Run the full stack locally with hot-reload:
