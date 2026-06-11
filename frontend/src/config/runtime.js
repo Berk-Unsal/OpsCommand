@@ -24,3 +24,23 @@ function resolveBackendUrl() {
 }
 
 export const BACKEND_URL = resolveBackendUrl();
+
+function resolveToolUrl(envKey, localPort, ingressPath) {
+  const envUrl = import.meta.env[envKey];
+  if (envUrl && typeof envUrl === 'string' && envUrl.trim()) {
+    return trimTrailingSlash(envUrl.trim());
+  }
+
+  if (typeof window !== 'undefined') {
+    if (LOCAL_HOSTS.has(window.location.hostname)) {
+      return `${window.location.protocol}//localhost:${localPort}`;
+    }
+
+    return `${window.location.protocol}//${window.location.host}${ingressPath}`;
+  }
+
+  return `http://localhost:${localPort}`;
+}
+
+export const GRAFANA_URL = resolveToolUrl('VITE_GRAFANA_URL', 3000, '/grafana');
+export const PROMETHEUS_URL = resolveToolUrl('VITE_PROMETHEUS_URL', 9090, '/prometheus');

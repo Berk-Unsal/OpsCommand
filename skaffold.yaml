@@ -24,3 +24,11 @@ portForward:
     resourceName: backend-service
     port: 4000
     localPort: 4000
+  - resourceType: service
+    resourceName: prometheus-service
+    port: 9090
+    localPort: 9090
+  - resourceType: service
+    resourceName: grafana-service
+    port: 3000
+    localPort: 3000

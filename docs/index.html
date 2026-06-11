@@ -1,87 +1,2249 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OpsCommand Demo</title>
-    <meta name="description" content="OpsCommand demo app on GitHub Pages" />
+    <meta
+      name="description"
+      content="OpsCommand documentation site: architecture, API reference, configuration, quick start, and operational guides."
+    />
+    <title>OpsCommand Docs</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css"
+    />
+    <style>
+      :root {
+        --bg: #0f1117;
+        --bg-elevated: #151924;
+        --bg-soft: #1b2130;
+        --bg-panel: #171b26;
+        --text: #f3f6fb;
+        --muted: #a9b4c5;
+        --faint: #778397;
+        --border: rgba(170, 184, 204, 0.16);
+        --border-strong: rgba(170, 184, 204, 0.28);
+        --accent: #3b82f6;
+        --accent-2: #10b981;
+        --accent-3: #f97316;
+        --warn: #f59e0b;
+        --shadow: 0 16px 40px rgba(3, 7, 18, 0.28);
+        --radius: 8px;
+        --sidebar-width: 310px;
+        --topbar-height: 72px;
+        --code-bg: #0b0f19;
+        --inline-code-bg: rgba(148, 163, 184, 0.12);
+      }
+
+      html[data-theme='light'] {
+        --bg: #f7f8fb;
+        --bg-elevated: #ffffff;
+        --bg-soft: #f0f3f8;
+        --bg-panel: #ffffff;
+        --text: #101828;
+        --muted: #4b5563;
+        --faint: #64748b;
+        --border: rgba(15, 23, 42, 0.12);
+        --border-strong: rgba(15, 23, 42, 0.18);
+        --accent: #0369a1;
+        --accent-2: #0f766e;
+        --accent-3: #c2410c;
+        --warn: #b45309;
+        --shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+        --code-bg: #0f172a;
+        --inline-code-bg: rgba(15, 23, 42, 0.07);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        line-height: 1.6;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      code {
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        background: var(--inline-code-bg);
+        color: color-mix(in srgb, var(--text) 88%, var(--accent));
+        font-family: 'Fira Code', monospace;
+        font-size: 0.88em;
+        padding: 0.12em 0.36em;
+      }
+
+      pre code {
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        color: inherit;
+        padding: 16px;
+      }
+
+      .shell {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-height: var(--topbar-height);
+        padding: 0 22px;
+        border-bottom: 1px solid var(--border);
+        background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+        backdrop-filter: blur(14px);
+      }
+
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--bg-panel) 88%, var(--bg-soft));
+        color: var(--text);
+        cursor: pointer;
+        transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+      }
+
+      .icon-btn:hover {
+        transform: translateY(-1px);
+        border-color: var(--border-strong);
+        background: var(--bg-soft);
+      }
+
+      .brand {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      .brand-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        font-size: 1rem;
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+
+      .brand-title span {
+        white-space: nowrap;
+      }
+
+      .version-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 8px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--bg-soft);
+        color: var(--muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+
+      .brand-subtitle {
+        font-size: 0.82rem;
+        color: var(--muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .topbar-search {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        max-width: 720px;
+        margin-left: auto;
+      }
+
+      .search-shell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        min-width: 0;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0 14px;
+        background: color-mix(in srgb, var(--bg-panel) 90%, var(--bg-soft));
+      }
+
+      .search-shell span {
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .search-input {
+        width: 100%;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: var(--text);
+        font: inherit;
+        padding: 12px 0;
+      }
+
+      .topbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+
+      .text-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 38px;
+        padding: 0 14px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--bg-panel) 88%, var(--bg-soft));
+        color: var(--text);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: transform 0.15s ease, border-color 0.15s ease;
+      }
+
+      .text-link:hover {
+        transform: translateY(-1px);
+        border-color: var(--border-strong);
+      }
+
+      .layout {
+        display: flex;
+        min-height: calc(100vh - var(--topbar-height));
+      }
+
+      .sidebar {
+        position: sticky;
+        top: var(--topbar-height);
+        align-self: flex-start;
+        width: var(--sidebar-width);
+        height: calc(100vh - var(--topbar-height));
+        overflow: auto;
+        border-right: 1px solid var(--border);
+        background: color-mix(in srgb, var(--bg-elevated) 97%, transparent);
+      }
+
+      .sidebar-inner {
+        padding: 18px;
+      }
+
+      .sidebar-block + .sidebar-block {
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 1px solid var(--border);
+      }
+
+      .sidebar-kicker {
+        font-size: 0.74rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--faint);
+        margin-bottom: 10px;
+      }
+
+      .sidebar-nav {
+        display: grid;
+        gap: 8px;
+      }
+
+      .sidebar-nav a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 9px 11px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: 600;
+        transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      }
+
+      .sidebar-nav a:hover,
+      .sidebar-nav a.active {
+        color: var(--text);
+        border-color: var(--border);
+        background: color-mix(in srgb, var(--bg-soft) 82%, var(--accent) 10%);
+      }
+
+      .sidebar-nav a.active span {
+        color: var(--accent);
+      }
+
+      .sidebar-note {
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .mini-stat-grid {
+        display: grid;
+        gap: 10px;
+      }
+
+      .mini-stat {
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--bg-panel) 88%, var(--bg-soft));
+      }
+
+      .mini-stat strong {
+        display: block;
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+      }
+
+      .mini-stat span {
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      .content {
+        flex: 1;
+        min-width: 0;
+        padding: 30px 28px 52px;
+      }
+
+      .content-inner {
+        max-width: 1160px;
+        margin: 0 auto;
+      }
+
+      .hero {
+        display: grid;
+        gap: 18px;
+        padding: 28px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background:
+          linear-gradient(90deg, color-mix(in srgb, var(--accent) 12%, transparent), transparent 42%),
+          var(--bg-panel);
+        box-shadow: var(--shadow);
+      }
+
+      .hero-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--bg-soft);
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .badge.accent {
+        color: var(--accent);
+        border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+      }
+
+      .badge.warn {
+        color: var(--warn);
+        border-color: color-mix(in srgb, var(--warn) 35%, var(--border));
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: clamp(2.35rem, 3vw, 3.2rem);
+        line-height: 1.05;
+        letter-spacing: 0;
+      }
+
+      .hero p {
+        margin: 0;
+        max-width: 78ch;
+        color: var(--muted);
+        font-size: 1rem;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .info-card {
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--bg-soft) 72%, var(--bg-panel));
+      }
+
+      .info-card strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 0.95rem;
+      }
+
+      .info-card span {
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .section {
+        margin-top: 24px;
+        padding: 24px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-panel);
+        box-shadow: var(--shadow);
+      }
+
+      .breadcrumbs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+        color: var(--muted);
+        font-size: 0.84rem;
+      }
+
+      .breadcrumbs a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+
+      .breadcrumbs span.sep {
+        color: var(--faint);
+      }
+
+      .section h2,
+      .section h3 {
+        margin: 0 0 10px;
+        letter-spacing: 0;
+      }
+
+      .section h2 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.42rem;
+        line-height: 1.2;
+        scroll-margin-top: 96px;
+      }
+
+      .section h2::before {
+        content: '';
+        display: block;
+        width: 4px;
+        height: 1.2em;
+        border-radius: 999px;
+        background: linear-gradient(180deg, var(--accent), var(--accent-2));
+      }
+
+      .section h3 {
+        margin-top: 18px;
+        font-size: 1.02rem;
+        color: var(--text);
+        scroll-margin-top: 96px;
+      }
+
+      .section p.lead {
+        max-width: 78ch;
+        margin: 0 0 16px;
+        color: var(--muted);
+      }
+
+      .section p {
+        max-width: 90ch;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .tile {
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--bg-soft) 58%, var(--bg-panel));
+      }
+
+      .tile h3 {
+        margin-top: 0;
+      }
+
+      .tile p:last-child {
+        margin-bottom: 0;
+      }
+
+      .tile ul {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--muted);
+      }
+
+      .tile li + li {
+        margin-top: 8px;
+      }
+
+      .figure {
+        margin: 0;
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-soft);
+      }
+
+      .figure img {
+        width: 100%;
+        display: block;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+      }
+
+      .figure figcaption {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .inventory {
+        display: grid;
+        gap: 12px;
+      }
+
+      .inventory details {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--bg-soft) 62%, var(--bg-panel));
+        overflow: clip;
+      }
+
+      .inventory summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 13px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-weight: 700;
+      }
+
+      .inventory summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .inventory-body {
+        padding: 0 16px 16px;
+        color: var(--muted);
+      }
+
+      .path-list {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      .path-list li code {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.88rem;
+      }
+
+      .codeframe {
+        margin: 16px 0;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--code-bg);
+      }
+
+      .codeframe-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 14px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+        color: #cbd5e1;
+        background: rgba(255, 255, 255, 0.045);
+        font-size: 0.82rem;
+      }
+
+      .copy-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 999px;
+        padding: 6px 10px;
+        background: rgba(255, 255, 255, 0.04);
+        color: #dbeafe;
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+
+      .copy-btn:hover {
+        border-color: rgba(148, 163, 184, 0.36);
+      }
+
+      pre {
+        margin: 0;
+      }
+
+      pre code {
+        display: block;
+        padding: 16px;
+        overflow: auto;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.88rem;
+        line-height: 1.65;
+      }
+
+      .diagram {
+        white-space: pre;
+        color: #dbeafe;
+      }
+
+      .table-wrap {
+        overflow: auto;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin: 16px 0;
+        background: color-mix(in srgb, var(--bg-soft) 58%, var(--bg-panel));
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+      }
+
+      th,
+      td {
+        padding: 11px 13px;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        position: sticky;
+        top: 0;
+        background: color-mix(in srgb, var(--bg-soft) 92%, var(--bg-panel));
+        color: var(--text);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      td {
+        color: var(--muted);
+      }
+
+      td strong,
+      td code {
+        color: var(--text);
+      }
+
+      .callout {
+        margin: 16px 0;
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--warn);
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--warn) 8%, var(--bg-panel));
+        color: var(--muted);
+      }
+
+      .callout strong {
+        color: var(--text);
+      }
+
+      .stack {
+        display: grid;
+        gap: 12px;
+      }
+
+      .module-card {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--bg-soft) 58%, var(--bg-panel));
+        overflow: clip;
+      }
+
+      .module-card summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 13px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-weight: 800;
+      }
+
+      .module-card[open] summary,
+      .inventory details[open] summary {
+        border-bottom: 1px solid var(--border);
+      }
+
+      .module-card summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .module-card-body {
+        padding: 0 16px 16px;
+      }
+
+      .module-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0 0 12px;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 9px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--bg-panel);
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      .anchor-link {
+        margin-left: 8px;
+        color: var(--faint);
+        text-decoration: none;
+        font-size: 0.82em;
+        opacity: 0;
+        transition: opacity 0.15s ease, color 0.15s ease;
+      }
+
+      h2:hover .anchor-link,
+      h3:hover .anchor-link {
+        opacity: 1;
+      }
+
+      .anchor-link:hover {
+        color: var(--accent);
+      }
+
+      .no-results {
+        margin-top: 20px;
+        padding: 16px;
+        border: 1px dashed var(--border-strong);
+        border-radius: 8px;
+        color: var(--muted);
+      }
+
+      footer {
+        margin-top: 28px;
+        padding: 18px 2px 8px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .mobile-only {
+        display: none;
+      }
+
+      @media (max-width: 1080px) {
+        .grid-3,
+        .hero-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+
+        .topbar {
+          flex-wrap: wrap;
+          height: auto;
+          padding-top: 12px;
+          padding-bottom: 12px;
+        }
+
+        .topbar-search {
+          width: 100%;
+          max-width: none;
+          order: 3;
+        }
+
+        .topbar-actions {
+          margin-left: auto;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          display: block;
+        }
+
+        .sidebar {
+          position: fixed;
+          inset: var(--topbar-height) auto 0 0;
+          width: min(var(--sidebar-width), 88vw);
+          transform: translateX(-105%);
+          transition: transform 0.22s ease;
+          z-index: 35;
+          box-shadow: var(--shadow);
+        }
+
+        body.sidebar-open .sidebar {
+          transform: translateX(0);
+        }
+
+        .sidebar.mobile-visible {
+          transform: translateX(0);
+        }
+
+        .overlay {
+          position: fixed;
+          inset: var(--topbar-height) 0 0 0;
+          background: rgba(2, 6, 23, 0.56);
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.2s ease;
+          z-index: 30;
+        }
+
+        body.sidebar-open .overlay {
+          opacity: 1;
+          pointer-events: auto;
+        }
+
+        .content {
+          padding: 18px 14px 40px;
+        }
+
+        .mobile-only {
+          display: inline-flex;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .hero,
+        .section {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+
+        .text-link span.label {
+          display: none;
+        }
+
+        .topbar-actions {
+          gap: 8px;
+        }
+
+        .search-shell span {
+          display: none;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div class="bg-orb orb-a"></div>
-    <div class="bg-orb orb-b"></div>
+    <div class="shell">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn mobile-only" id="sidebarToggle" type="button" aria-label="Toggle navigation">
+            ☰
+          </button>
+          <div class="brand">
+            <div class="brand-title">
+              <span>OpsCommand</span>
+              <span class="version-pill">v1.0.0</span>
+            </div>
+            <div class="brand-subtitle">Documentation website for the collaborative DevOps terminal</div>
+          </div>
+        </div>
 
-    <header class="hero shell">
-      <p class="eyebrow">Realtime DevOps Collaboration</p>
-      <h1>OpsCommand Demo</h1>
-      <p class="subtitle">
-        Team chat and operational slash commands in one flow. This static demo reflects the
-        live project architecture with a simulated command terminal.
-      </p>
-      <div class="cta-row">
-        <a class="btn solid" href="../README.md">Read Documentation</a>
-        <a class="btn ghost" href="https://github.com/" target="_blank" rel="noreferrer">View Repository</a>
+        <div class="topbar-search">
+          <label class="search-shell" aria-label="Search docs">
+            <span>Search</span>
+            <input id="searchInput" class="search-input" type="search" placeholder="Search sections, APIs, config, examples" />
+          </label>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="icon-btn" id="themeToggle" type="button" aria-label="Toggle theme">☾</button>
+          <a
+            class="text-link"
+            href="https://github.com/Berk-Unsal/OpsCommand"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <span>GitHub</span>
+            <span class="label">↗</span>
+          </a>
+        </div>
+      </header>
+
+      <div class="layout">
+        <aside class="sidebar" id="sidebar">
+          <div class="sidebar-inner">
+            <div class="sidebar-block">
+              <div class="sidebar-kicker">Sections</div>
+              <nav class="sidebar-nav" id="sidebarNav">
+                <a href="#overview" data-nav="overview">Overview <span>01</span></a>
+                <a href="#quick-start" data-nav="quick-start">Quick Start <span>02</span></a>
+                <a href="#architecture" data-nav="architecture">Architecture <span>03</span></a>
+                <a href="#api-reference" data-nav="api-reference">API Reference <span>04</span></a>
+                <a href="#configuration" data-nav="configuration">Configuration <span>05</span></a>
+                <a href="#guides" data-nav="guides">Guides <span>06</span></a>
+                <a href="#examples" data-nav="examples">Examples <span>07</span></a>
+              </nav>
+            </div>
+
+            <div class="sidebar-block">
+              <div class="sidebar-kicker">Repo notes</div>
+              <div class="mini-stat-grid">
+                <div class="mini-stat">
+                  <strong>Manual validation</strong>
+                  <span>No <code>test/</code> or <code>spec/</code> files were found in the repo surface.</span>
+                </div>
+                <div class="mini-stat">
+                  <strong>Ignored paths</strong>
+                  <span><code>.git</code>, <code>node_modules</code>, <code>dist</code>, <code>build</code>, <code>__pycache__</code>, <code>.env</code></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sidebar-block">
+              <div class="sidebar-kicker">Quick links</div>
+              <div class="sidebar-note">
+                Root redirect: <a href="../index.html">index.html</a><br />
+                Screenshot assets: <a href="../assets/operations.png">operations.png</a>, <a href="../assets/dashboard.png">dashboard.png</a>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <div class="overlay" id="overlay"></div>
+
+        <main class="content">
+          <div class="content-inner">
+            <section class="hero" id="hero">
+              <div class="hero-badges">
+                <span class="badge accent">Docker Compose</span>
+                <span class="badge accent">Kubernetes</span>
+                <span class="badge accent">Socket.io</span>
+                <span class="badge accent">MongoDB</span>
+                <span class="badge warn">No changelog or tags</span>
+              </div>
+              <h1>OpsCommand</h1>
+              <p>
+                OpsCommand is a collaborative DevOps workspace that combines team chat, a live ops terminal,
+                a user dashboard, and Kubernetes-aware commands in one interface. This documentation is built
+                directly from the repository's README, source files, manifests, and screenshots, so every claim
+                here traces back to code or checked-in config.
+              </p>
+              <div class="hero-grid">
+                <div class="info-card">
+                  <strong>Audience</strong>
+                  <span>Engineering teams that want one browser surface for chat, operational commands, and cluster state.</span>
+                </div>
+                <div class="info-card">
+                  <strong>Runtime shape</strong>
+                  <span>React frontend, Express + Socket.io backend, MongoDB persistence, and Kubernetes integration through the client SDK.</span>
+                </div>
+                <div class="info-card">
+                  <strong>Docs status</strong>
+                  <span>Single-file site in <code>docs/index.html</code>, designed for GitHub Pages and local static preview.</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="section doc-section" id="overview" data-search="overview opscommand collaborative devops terminal team chat k8s dashboard screenshots file map repository map readme requirements project report system modeling">
+              <div class="breadcrumbs">
+                <a href="#hero">Docs</a><span class="sep">/</span><span>Overview</span>
+              </div>
+              <h2 id="overview-title">Overview</h2>
+              <p class="lead">
+                OpsCommand unifies collaboration and Kubernetes operations. The frontend gives engineers a split
+                workspace for chat and terminal commands, while the backend authenticates users, persists history,
+                executes slash commands, scrapes cluster state, and publishes telemetry.
+              </p>
+
+              <div class="grid-3">
+                <div class="tile">
+                  <h3>What it does</h3>
+                  <ul>
+                    <li>Real-time team chat over Socket.io.</li>
+                    <li>Slash-command ops terminal for Kubernetes workflows.</li>
+                    <li>JWT-based auth, profile updates, and persisted message history.</li>
+                  </ul>
+                </div>
+                <div class="tile">
+                  <h3>What it is for</h3>
+                  <ul>
+                    <li>Incident response and routine cluster work.</li>
+                    <li>Engineering teams who need one workspace instead of several tools.</li>
+                    <li>Local development with Docker Compose or Kubernetes/Skaffold.</li>
+                  </ul>
+                </div>
+                <div class="tile">
+                  <h3>What was read</h3>
+                  <ul>
+                    <li><code>README.md</code>, <code>requirements.md</code>, <code>project_report.md</code>, <code>system_modeling.md</code>.</li>
+                    <li>Backend and frontend source modules.</li>
+                    <li>Kubernetes, monitoring, and GitHub Actions config.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <h3>Repository map</h3>
+              <p class="lead">
+                The list below covers the relevant non-ignored files discovered under the project root. Ignored
+                directories such as <code>.git</code>, <code>node_modules</code>, <code>dist</code>, <code>build</code>,
+                <code>__pycache__</code>, and <code>.env</code> are excluded on purpose.
+              </p>
+
+              <div class="inventory">
+                <details open>
+                  <summary>Core, docs, and toolchain files <span class="badge">22 files</span></summary>
+                  <div class="inventory-body">
+                    <ul class="path-list">
+                      <li><code>README.md</code></li>
+                      <li><code>requirements.md</code></li>
+                      <li><code>project_report.md</code></li>
+                      <li><code>project_report.pdf</code></li>
+                      <li><code>system_modeling.md</code></li>
+                      <li><code>index.html</code> (root redirect)</li>
+                      <li><code>docker-compose.yml</code></li>
+                      <li><code>skaffold.yaml</code></li>
+                      <li><code>kind-config.yaml</code></li>
+                      <li><code>.gitignore</code></li>
+                      <li><code>.github/workflows/deploy-pages.yml</code></li>
+                      <li><code>.github/workflows/ci.yaml</code></li>
+                      <li><code>backend/package.json</code></li>
+                      <li><code>backend/package-lock.json</code></li>
+                      <li><code>frontend/package.json</code></li>
+                      <li><code>frontend/package-lock.json</code></li>
+                      <li><code>backend/Dockerfile</code></li>
+                      <li><code>frontend/Dockerfile</code></li>
+                      <li><code>frontend/README.md</code></li>
+                      <li><code>frontend/index.html</code></li>
+                      <li><code>frontend/eslint.config.js</code></li>
+                      <li><code>frontend/vite.config.js</code></li>
+                    </ul>
+                  </div>
+                </details>
+
+                <details>
+                  <summary>Backend source files <span class="badge warn">⚠️ needs docs</span></summary>
+                  <div class="inventory-body">
+                    <ul class="path-list">
+                      <li><code>backend/server.js</code></li>
+                      <li><code>backend/routes/auth.js</code></li>
+                      <li><code>backend/config/passport.js</code></li>
+                      <li><code>backend/middleware/auth.js</code></li>
+                      <li><code>backend/models/User.js</code></li>
+                      <li><code>backend/commands/clear.js</code></li>
+                      <li><code>backend/commands/help.js</code></li>
+                      <li><code>backend/commands/logs.js</code></li>
+                      <li><code>backend/commands/restart.js</code></li>
+                      <li><code>backend/commands/status.js</code></li>
+                      <li><code>backend/commands/userlist.js</code></li>
+                      <li><code>backend/commands/visualize.js</code></li>
+                    </ul>
+                  </div>
+                </details>
+
+                <details>
+                  <summary>Frontend source files <span class="badge warn">⚠️ needs docs</span></summary>
+                  <div class="inventory-body">
+                    <ul class="path-list">
+                      <li><code>frontend/src/main.jsx</code></li>
+                      <li><code>frontend/src/App.jsx</code></li>
+                      <li><code>frontend/src/config/runtime.js</code></li>
+                      <li><code>frontend/src/components/Analytics.jsx</code></li>
+                      <li><code>frontend/src/components/Dashboard.jsx</code></li>
+                      <li><code>frontend/src/components/LoginScreen.jsx</code></li>
+                      <li><code>frontend/src/components/OpsTerminal.jsx</code></li>
+                      <li><code>frontend/src/components/ProfileSidebar.jsx</code></li>
+                      <li><code>frontend/src/components/TeamChat.jsx</code></li>
+                      <li><code>frontend/src/App.css</code></li>
+                      <li><code>frontend/src/index.css</code></li>
+                      <li><code>frontend/src/components/Analytics.css</code></li>
+                      <li><code>frontend/src/components/Dashboard.css</code></li>
+                      <li><code>frontend/src/components/LoginScreen.css</code></li>
+                      <li><code>frontend/src/components/OpsTerminal.css</code></li>
+                      <li><code>frontend/src/components/ProfileSidebar.css</code></li>
+                      <li><code>frontend/src/components/TeamChat.css</code></li>
+                    </ul>
+                  </div>
+                </details>
+
+                <details>
+                  <summary>Schema, deployment, and monitoring config <span class="badge">13 files</span></summary>
+                  <div class="inventory-body">
+                    <ul class="path-list">
+                      <li><code>k8s/backend.yaml</code></li>
+                      <li><code>k8s/configmap.yaml</code></li>
+                      <li><code>k8s/frontend.yaml</code></li>
+                      <li><code>k8s/ingress.yaml</code></li>
+                      <li><code>k8s/mongo.yaml</code></li>
+                      <li><code>k8s/monitoring.yaml</code></li>
+                      <li><code>k8s/rbac.yaml</code></li>
+                      <li><code>k8s/secret.yaml</code></li>
+                      <li><code>monitoring/prometheus/prometheus.yml</code></li>
+                      <li><code>monitoring/prometheus/alerts.yml</code></li>
+                      <li><code>monitoring/grafana/provisioning/datasources/prometheus.yml</code></li>
+                      <li><code>monitoring/grafana/provisioning/dashboards/dashboards.yml</code></li>
+                      <li><code>monitoring/grafana/dashboards/opscommand-overview.json</code></li>
+                    </ul>
+                  </div>
+                </details>
+
+                <details>
+                  <summary>Assets and media <span class="badge">4 files</span></summary>
+                  <div class="inventory-body">
+                    <ul class="path-list">
+                      <li><code>assets/operations.png</code></li>
+                      <li><code>assets/dashboard.png</code></li>
+                      <li><code>frontend/src/assets/react.svg</code></li>
+                      <li><code>frontend/public/vite.svg</code></li>
+                    </ul>
+                  </div>
+                </details>
+              </div>
+
+              <div class="grid-2" style="margin-top: 18px;">
+                <figure class="figure">
+                  <img src="../assets/operations.png" alt="OpsCommand operations view screenshot" />
+                  <figcaption>Operations view: split chat and ops terminal with a unified command input.</figcaption>
+                </figure>
+                <figure class="figure">
+                  <img src="../assets/dashboard.png" alt="OpsCommand dashboard view screenshot" />
+                  <figcaption>Dashboard view: cluster health summary plus registered users table.</figcaption>
+                </figure>
+              </div>
+            </section>
+
+            <section class="section doc-section" id="quick-start" data-search="quick start install first working example docker compose npm install backend frontend login help status command">
+              <div class="breadcrumbs">
+                <a href="#hero">Docs</a><span class="sep">/</span><span>Quick Start</span>
+              </div>
+              <h2 id="quick-start-title">Quick Start</h2>
+              <p class="lead">
+                The quickest path to a working setup is Docker Compose. If you want the Kubernetes path, the
+                manifests and Skaffold config are ready too.
+              </p>
+
+              <div class="stack">
+                <div class="tile">
+                  <h3>1. Install dependencies</h3>
+                  <div class="codeframe">
+                    <div class="codeframe-head">
+                      <span>Install frontend and backend packages</span>
+                    </div>
+                    <pre><code class="language-bash">cd frontend
+npm install
+
+cd ../backend
+npm install</code></pre>
+                  </div>
+                </div>
+
+                <div class="tile">
+                  <h3>2. Start the stack</h3>
+                  <div class="codeframe">
+                    <div class="codeframe-head">
+                      <span>Local Docker Compose workflow</span>
+                    </div>
+                    <pre><code class="language-bash">cd ..
+docker-compose up</code></pre>
+                  </div>
+                  <p class="lead" style="margin-bottom: 0;">
+                    This brings up the frontend on <code>http://localhost:5173</code>, backend on
+                    <code>http://localhost:4000</code>, MongoDB on <code>27017</code>, Prometheus on
+                    <code>9090</code>, Grafana on <code>3000</code>, and Node Exporter on <code>9100</code>.
+                  </p>
+                </div>
+
+                <div class="tile">
+                  <h3>3. Sign in or register</h3>
+                  <p class="lead" style="margin-bottom: 0;">
+                    The login screen talks to <code>/api/auth/login</code> and <code>/api/auth/register</code>,
+                    then stores the JWT in <code>localStorage</code> under <code>ops_token</code>.
+                  </p>
+                </div>
+
+                <div class="tile">
+                  <h3>4. Try your first commands</h3>
+                  <div class="codeframe">
+                    <div class="codeframe-head">
+                      <span>First working example in the ops terminal</span>
+                    </div>
+                    <pre><code class="language-bash">/help
+/status
+/visualize</code></pre>
+                  </div>
+                  <p class="lead" style="margin-bottom: 0;">
+                    Regular text goes to team chat, while anything starting with <code>/</code> becomes an ops command.
+                  </p>
+                </div>
+              </div>
+
+              <div class="callout">
+                <strong>Tip:</strong> if you prefer Kubernetes, jump to the
+                <a href="#guides">Guides</a> section for the <code>kind</code> + <code>skaffold</code> path.
+              </div>
+            </section>
+
+            <section class="section doc-section" id="architecture" data-search="architecture diagram design decisions runtime flow websocket jwt mongodb kubernetes client node command loader">
+              <div class="breadcrumbs">
+                <a href="#hero">Docs</a><span class="sep">/</span><span>Architecture</span>
+              </div>
+              <h2 id="architecture-title">Architecture</h2>
+              <p class="lead">
+                The design is intentionally small and direct: a React client talks to an Express backend by both
+                REST and Socket.io, while the backend persists messages in MongoDB and reaches the Kubernetes API
+                through the official client library.
+              </p>
+
+              <div class="codeframe">
+                <div class="codeframe-head">
+                  <span>Text diagram of the runtime layout</span>
+                </div>
+                <pre><code class="diagram">Engineer
+  │
+  ▼
+Browser ── REST/JWT ──► Express backend ──► MongoDB
+  │                          │
+  │                          ├──► Socket.io events (team chat + ops logs)
+  │                          ├──► Kubernetes client-node API
+  │                          └──► Dynamic command loader from backend/commands
+  │
+  └── WebSocket ─────────────► Real-time updates back to the UI</code></pre>
+              </div>
+
+              <div class="grid-2">
+                <div class="tile">
+                  <h3>Key decisions visible in source</h3>
+                  <ul>
+                    <li>Commands are discovered at startup by reading <code>backend/commands/*.js</code>.</li>
+                    <li>The frontend uses one input bar: slash-prefixed text becomes ops traffic; everything else is chat.</li>
+                    <li>Auth state is JWT-based, while the code also keeps a separate passport session helper in source.</li>
+                    <li>Prometheus metrics are exported from the backend on <code>/metrics</code>.</li>
+                  </ul>
+                </div>
+                <div class="tile">
+                  <h3>Flow in plain English</h3>
+                  <ul>
+                    <li>Login or register in the browser.</li>
+                    <li>Receive a token and store it locally.</li>
+                    <li>Open the split workspace and send chat or ops commands.</li>
+                    <li>Render live results, history, dashboard data, and monitoring links.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="callout">
+                <strong>Note:</strong> the repository includes both JWT auth routes and a Passport GitHub strategy helper.
+                The live backend entrypoint currently wires JWT auth into the dashboard endpoint and profile routes.
+              </div>
+            </section>
+
+            <section class="section doc-section" id="api-reference" data-search="api reference backend auth routes commands user model passport middleware frontend components runtime url constants exports signatures signatures side effects">
+              <div class="breadcrumbs">
+                <a href="#hero">Docs</a><span class="sep">/</span><span>API Reference</span>
+              </div>
+              <h2 id="api-reference-title">API Reference</h2>
+              <p class="lead">
+                This reference stays strictly inside the code that exists. If a module is lightly commented or not
+                wired into the current runtime path, that is called out directly.
+              </p>
+
+              <div class="stack">
+                <details class="module-card" open>
+                  <summary>
+                    <span>backend/server.js</span>
+                    <span class="badge warn">⚠️ needs docs</span>
+                  </summary>
+                  <div class="module-card-body">
+                    <div class="module-meta">
+                      <span class="chip">Entry point</span>
+                      <span class="chip">Express</span>
+                      <span class="chip">Socket.io</span>
+                      <span class="chip">MongoDB</span>
+                      <span class="chip">Prometheus</span>
+                      <span class="chip">Kubernetes client</span>
+                    </div>
+                    <p>
+                      Purpose: boot the HTTP server, connect to MongoDB with retry logic, configure the Kubernetes
+                      clients, mount auth routes, expose metrics, and wire the live chat / ops command transport.
+                    </p>
+                    <div class="table-wrap">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Surface</th>
+                            <th>Behavior</th>
+                            <th>Notes</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><strong>GET /metrics</strong></td>
+                            <td>Returns Prometheus metrics from the local registry.</td>
+                            <td>Includes default Node metrics plus custom command counters and latency histogram.</td>
+                          </tr>
+                          <tr>
+                            <td><strong>GET /api/dashboard/overview</strong></td>
+                            <td>Requires Bearer token, then returns running pod counts and user list.</td>
+                            <td>Uses <code>verifyToken</code> from <code>backend/routes/auth.js</code>.</td>
+                          </tr>
+                          <tr>
+                            <td><strong>Socket events</strong></td>
+                            <td><code>team-message</code>, <code>ops-command</code>, and legacy <code>send_message</code>.</td>
+                            <td>Messages are persisted to MongoDB and rebroadcast as chat or ops log events.</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <p class="lead" style="margin-bottom: 0;">
+                      Side effects: the module opens the server on <code>0.0.0.0:4000</code>, starts a MongoDB
+                      connection attempt, loads commands dynamically, and emits operational logs to connected clients.
+                    </p>
+                  </div>
+                </details>
+
+                <details class="module-card">
+                  <summary>
+                    <span>backend/routes/auth.js</span>
+                    <span class="badge warn">⚠️ needs docs</span>
+                  </summary>
+                  <div class="module-card-body">
+                    <div class="module-meta">
+                      <span class="chip">JWT</span>
+                      <span class="chip">Register / Login / Me / Profile</span>
+                      <span class="chip">Exports router + verifyToken</span>
+                    </div>
+                    <div class="table-wrap">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Route</th>
+                            <th>Request</th>
+                            <th>Response</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><code>POST /api/auth/register</code></td>
+                            <td><code>{ username, displayName, password }</code></td>
+                            <td><code>201 { token, user }</code>; validates required fields and minimum password length.</td>
+                          </tr>
+                          <tr>
+                            <td><code>POST /api/auth/login</code></td>
+                            <td><code>{ username, password }</code></td>
+                            <td><code>{ token, user }</code>; rejects missing or invalid credentials.</td>
+                          </tr>
+                          <tr>
+                            <td><code>GET /api/auth/me</code></td>
+                            <td>Bearer token in <code>Authorization</code> header.</td>
+                            <td><code>{ user }</code>; returns 401 when no token or token is invalid.</td>
+                          </tr>
+                          <tr>
+                            <td><code>PUT /api/auth/profile</code></td>
+                            <td><code>{ displayName?, currentPassword?, newPassword? }</code> plus Bearer token.</td>
+                            <td><code>{ token, user }</code>; re-signs the token after updates.</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <ul class="path-list">
+                      <li>Token expiry: <code>7d</code>.</li>
+                      <li>JWT payload: <code>{ id, username, displayName }</code>.</li>
+                      <li>Default secret fallback in source: <code>opscommand-secret-key-change-in-production</code>.</li>
+                    </ul>
+                  </div>
+                </details>
+
+                <details class="module-card">
+                  <summary>
+                    <span>backend/models/User.js</span>
+                    <span class="badge warn">⚠️ needs docs</span>
+                  </summary>
+                  <div class="module-card-body">
+                    <div class="module-meta">
+                      <span class="chip">Mongoose model</span>
+                      <span class="chip">Password hashing</span>
+                      <span class="chip">Role-based defaults</span>
+                    </div>
+                    <div class="table-wrap">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Field / Method</th>
+                            <th>Signature or shape</th>
+                            <th>Notes</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><code>username</code></td>
+                            <td>String, required, unique, 3-30 chars.</td>
+                            <td>Trimmed before save.</td>
+                          </tr>
+                          <tr>
+                            <td><code>displayName</code></td>
+                            <td>String, required, 1-50 chars.</td>
+                            <td>Trimmed before save.</td>
+                          </tr>
+                          <tr>
+                            <td><code>password</code></td>
+                            <td>String, required, at least 6 chars.</td>
+                            <td>Hashed in a <code>pre('save')</code> hook with bcrypt salt rounds of 10.</td>
+                          </tr>
+                          <tr>
+                            <td><code>role</code> / <code>permissions</code></td>
+                            <td>Role enum: <code>admin</code>, <code>engineer</code>, <code>viewer</code>.</td>
+                            <td>Default role is <code>engineer</code>; permissions are inferred from role when the array is empty.</td>
+                          </tr>
+                          <tr>
+                            <td><code>comparePassword(candidatePassword)</code></td>
+                            <td>Instance method</td>
+                            <td>Returns bcrypt comparison result.</td>
+                          </tr>
+                          <tr>
+                            <td><code>toJSON()</code></td>
+                            <td>Instance method</td>
+                            <td>Strips <code>password</code> from serialized output.</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </details>
+
+                <details class="module-card">
+                  <summary>
+                    <span>backend/middleware/auth.js</span>
+                    <span class="badge warn">⚠️ needs docs</span>
+                  </summary>
+                  <div class="module-card-body">
+                    <div class="module-meta">
+                      <span class="chip">Session helper</span>
+                      <span class="chip">Protected command list</span>
+                    </div>
+                    <p>
+                      This file exports session-oriented helpers and a command allowlist. It is present in source,
+                      but the active backend runtime currently uses JWT auth middleware in <code>server.js</code>
+                      rather than Express session auth.
+                    </p>
+                    <ul class="path-list">
+                      <li><code>isAuthenticated(req, res, next)</code> — calls <code>req.isAuthenticated()</code>.</li>
+                      <li><code>getSocketUser(socket)</code> — reads <code>socket.request.session?.passport?.user</code>.</li>
+                      <li><code>protectedCommands</code> — <code>['/restart', '/execute']</code>.</li>
+                      <li><code>isProtectedCommand(commandName)</code> — membership test for the allowlist.</li>
+                    </ul>
+                  </div>
+                </details>
+
+                <details class="module-card">
+                  <summary>
+                    <span>backend/config/passport.js</span>
+                    <span class="badge warn">⚠️ needs docs</span>
+                  </summary>
+                  <div class="module-card-body">
+                    <div class="module-meta">
+                      <span class="chip">Passport</span>
+                      <span class="chip">GitHub strategy</span>
+                      <span class="chip">Session serializer</span>
+                    </div>
+                    <p>
+                      Configures <code>passport-github2</code> with <code>GITHUB_CLIENT_ID</code>,
+                      <code>GITHUB_CLIENT_SECRET</code>, and <code>GITHUB_CALLBACK_URL</code>, then serializes a simple
+                      user object from the GitHub profile.
+                    </p>
+                    <div class="callout">
+                      <strong>Note:</strong> this helper exists in source, but it is not imported by the current
+                      <code>backend/server.js</code> entrypoint. The backend package manifest in this repo also does
+                      not list Passport-related dependencies.
+                    </div>
+                  </div>
+                </details>
+
+                <details class="module-card" open>
+                  <summary>
+                    <span>backend/commands/*.js</span>
+                    <span class="badge warn">⚠️ needs docs</span>
+                  </summary>
+                  <div class="module-card-body">
+                    <div class="module-meta">
+                      <span class="chip">Dynamic plugins</span>
+                      <span class="chip">Each exports <code>{ name, description, execute }</code></span>
+                    </div>
+                    <div class="table-wrap">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Command</th>
+                            <th>Signature</th>
+                            <th>What it does</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><code>/clear</code></td>
+                            <td><code>execute(data, context)</code></td>
+                            <td>Broadcasts <code>clear-ops-terminal</code> and confirms terminal reset.</td>
+                          </tr>
+                          <tr>
+                            <td><code>/help</code></td>
+                            <td><code>execute(data, context)</code></td>
+                            <td>Builds a live help message from the loaded command map.</td>
+                          </tr>
+                          <tr>
+                            <td><code>/logs &lt;pod-name&gt;</code></td>
+                            <td><code>execute(data, context)</code></td>
+                            <td>Reads the last 20 log lines from a pod in the default namespace.</td>
+                          </tr>
+                          <tr>
+                            <td><code>/restart &lt;deployment-name&gt;</code></td>
+                            <td><code>execute(data, context)</code></td>
+                            <td>Reads and replaces the deployment, stamping <code>kubectl.kubernetes.io/restartedAt</code>.</td>
+                          </tr>
+                          <tr>
+                            <td><code>/status</code></td>
+                            <td><code>execute(data, context)</code></td>
+                            <td>Counts total and running pods in the default namespace.</td>
+                          </tr>
+                          <tr>
+                            <td><code>/userlist</code></td>
+                            <td><code>execute(data, context)</code></td>
+                            <td>Queries MongoDB users and renders an ASCII table of usernames, roles, and permissions.</td>
+                          </tr>
+                          <tr>
+                            <td><code>/visualize</code></td>
+                            <td><code>execute(data, context)</code></td>
+                            <td>Produces an ASCII health board for backend uptime, pod status, and prior failures.</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <p class="lead" style="margin-bottom: 0;">
+                      The command loader in <code>server.js</code> reads every <code>.js</code> file in this folder,
+                      inserts it into a map keyed by <code>command.name</code>, and dispatches via the shared
+                      <code>handleCommand()</code> helper.
+                    </p>
+                  </div>
+                </details>
+
+                <details class="module-card">
+                  <summary>
+                    <span>frontend/src/App.jsx</span>
+                    <span class="badge warn">⚠️ needs docs</span>
+                  </summary>
+                  <div class="module-card-body">
+                    <div class="module-meta">
+                      <span class="chip">Default export: <code>App</code></span>
+                      <span class="chip">Creates shared socket at module load</span>
+                      <span class="chip">Auth gate</span>
+                    </div>
+                    <p>
+                      Orchestrates the login flow, profile sidebar, top bar, page switching, and the unified input
+                      bar that routes slash commands to the ops terminal. It imports the backend URL from
+                      <code>frontend/src/config/runtime.js</code> and opens the Socket.io client immediately.
+                    </p>
+                    <ul class="path-list">
+                      <li>State: user, token, auth loading, profile panel, terminal collapse, active page, socket connection.</li>
+                      <li>Auth bootstrap: reads <code>ops_token</code> from <code>localStorage</code> and validates it with <code>/api/auth/me</code>.</li>
+                      <li>Unified send rule: messages starting with <code>/</code> emit <code>ops-command</code>; all others emit <code>team-message</code>.</li>
+                    </ul>
+                  </div>
+                </details>
+
+                <details class="module-card">
+                  <summary>
+                    <span>frontend/src/components/Dashboard.jsx</span>
+                    <span class="badge warn">⚠️ needs docs</span>
+                  </summary>
+                  <div class="module-card-body">
+                    <div class="module-meta">
+                      <span class="chip">Default export: <code>Dashboard({ token })</code></span>
+                      <span class="chip">Fetches <code>/api/dashboard/overview</code></span>
+                    </div>
+                    <p>
+                      Renders a donut chart of running pods by service and a user table. It calls the authenticated
+                      dashboard endpoint, then normalizes the response into <code>ops-backend</code>,
+                      <code>ops-frontend</code>, and <code>ops-mongo</code> counts.
+                    </p>
+                  </div>
+                </details>
+
+                <details class="module-card">
+                  <summary>
+                    <span>frontend/src/components/Analytics.jsx</span>
+                    <span class="badge warn">⚠️ needs docs</span>
+                  </summary>
+                  <div class="module-card-body">
+                    <div class="module-meta">
+                      <span class="chip">Default export: <code>Analytics()</code></span>
+                      <span class="chip">Uses runtime URLs</span>
+                    </div>
+                    <p>
+                      Presents launch targets for Grafana, Prometheus, and backend metrics. The selected destination
+                      updates the visible panel and opens the target in a new tab.
+                    </p>
+                  </div>
+                </details>
+
+                <details class="module-card">
+                  <summary>
+                    <span>frontend/src/components/LoginScreen.jsx</span>
+                    <span class="badge warn">⚠️ needs docs</span>
+                  </summary>
+                  <div class="module-card-body">
+                    <div class="module-meta">
+                      <span class="chip">Default export: <code>LoginScreen({ onLogin })</code></span>
+                      <span class="chip">Register / login UI</span>
+                    </div>
+                    <p>
+                      Handles both register and login flows. Successful auth writes the token and user payload to
+                      <code>localStorage</code>, then hands control back to <code>App</code>.
+                    </p>
+                  </div>
+                </details>
+
+                <details class="module-card" open>
+                  <summary>
+                    <span>frontend/src/components/OpsTerminal.jsx</span>
+                    <span class="badge">partly documented</span>
+                  </summary>
+                  <div class="module-card-body">
+                    <div class="module-meta">
+                      <span class="chip">Default export: <code>OpsTerminal({ socket, isConnected, myId })</code></span>
+                      <span class="chip">Listens for <code>ops-log</code></span>
+                    </div>
+                    <p>
+                      The right-side terminal keeps a log history, pretty-prints JSON when it can, classifies
+                      severity from text content, and listens for <code>load_ops_history</code>,
+                      <code>ops-log</code>, and <code>clear-ops-terminal</code>.
+                    </p>
+                    <ul class="path-list">
+                      <li><code>looksLikeCodeBlock(text)</code> — detects JSON-like or multi-line structured output.</li>
+                      <li><code>classifyMessage(text)</code> — returns <code>info</code>, <code>success</code>, <code>warning</code>, or <code>error</code>.</li>
+                      <li><code>tryPrettyJson(text)</code> — returns formatted JSON or <code>null</code>.</li>
+                    </ul>
+                  </div>
+                </details>
+
+                <details class="module-card" open>
+                  <summary>
+                    <span>frontend/src/components/TeamChat.jsx</span>
+                    <span class="badge">partly documented</span>
+                  </summary>
+                  <div class="module-card-body">
+                    <div class="module-meta">
+                      <span class="chip">Default export: <code>TeamChat({ socket, isConnected, myId })</code></span>
+                      <span class="chip">Listens for <code>team-message</code></span>
+                    </div>
+                    <p>
+                      The left-side chat panel loads persisted chat history, appends live messages, and derives avatar
+                      initials and colors from sender names.
+                    </p>
+                    <ul class="path-list">
+                      <li><code>initials(name)</code> — turns sender names into short avatar text.</li>
+                      <li><code>avatarColor(name)</code> — stable pseudo-random color selection.</li>
+                      <li><code>formatTime(timestamp)</code> — renders message timestamps for the bubble footer.</li>
+                    </ul>
+                  </div>
+                </details>
+
+                <details class="module-card">
+                  <summary>
+                    <span>frontend/src/components/ProfileSidebar.jsx</span>
+                    <span class="badge warn">⚠️ needs docs</span>
+                  </summary>
+                  <div class="module-card-body">
+                    <div class="module-meta">
+                      <span class="chip">Default export: <code>ProfileSidebar({ user, token, onUpdate, onLogout, open, onClose })</code></span>
+                    </div>
+                    <p>
+                      Slide-in profile editor for changing display name and password, with token refresh after a
+                      successful update and a local logout path.
+                    </p>
+                  </div>
+                </details>
+
+                <details class="module-card">
+                  <summary>
+                    <span>frontend/src/config/runtime.js</span>
+                    <span class="badge warn">⚠️ needs docs</span>
+                  </summary>
+                  <div class="module-card-body">
+                    <div class="module-meta">
+                      <span class="chip">Exports <code>BACKEND_URL</code>, <code>GRAFANA_URL</code>, <code>PROMETHEUS_URL</code></span>
+                    </div>
+                    <p>
+                      Resolves runtime URLs from Vite environment variables or the current host. Local development
+                      defaults to <code>localhost</code>, while ingress deployments reuse the current host and append
+                      the Grafana or Prometheus path prefix.
+                    </p>
+                  </div>
+                </details>
+
+                <details class="module-card">
+                  <summary>
+                    <span>frontend/src/main.jsx</span>
+                    <span class="badge warn">⚠️ needs docs</span>
+                  </summary>
+                  <div class="module-card-body">
+                    <div class="module-meta">
+                      <span class="chip">Mounts <code>App</code></span>
+                      <span class="chip">React StrictMode</span>
+                    </div>
+                    <p>
+                      Bootstraps the React root at <code>#root</code> and renders <code>App</code> inside
+                      <code>StrictMode</code>.
+                    </p>
+                  </div>
+                </details>
+              </div>
+            </section>
+
+            <section class="section doc-section" id="configuration" data-search="configuration env vars defaults examples docker compose kubernetes skaffold kind prometheus grafana ingress backend frontend auth secret port mongo uri jwt secret github client id client secret">
+              <div class="breadcrumbs">
+                <a href="#hero">Docs</a><span class="sep">/</span><span>Configuration</span>
+              </div>
+              <h2 id="configuration-title">Configuration</h2>
+              <p class="lead">
+                This section covers the knobs present in the source: environment variables, Kubernetes manifests,
+                monitoring config, and the deployment helpers used by Docker Compose, Skaffold, and GitHub Actions.
+              </p>
+
+              <h3>Environment variables</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Key</th>
+                      <th>Used by</th>
+                      <th>Type / default</th>
+                      <th>What it controls</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>PORT</code></td>
+                      <td>Backend server, Docker Compose, K8s ConfigMap</td>
+                      <td>String / <code>4000</code></td>
+                      <td>HTTP port for the backend entrypoint.</td>
+                    </tr>
+                    <tr>
+                      <td><code>MONGO_URI</code></td>
+                      <td>Backend, Docker Compose, K8s Secret</td>
+                      <td>String / <code>mongodb://localhost:27017/opscommand</code> in source</td>
+                      <td>MongoDB connection string used by Mongoose.</td>
+                    </tr>
+                    <tr>
+                      <td><code>JWT_SECRET</code></td>
+                      <td><code>backend/routes/auth.js</code></td>
+                      <td>String / <code>opscommand-secret-key-change-in-production</code></td>
+                      <td>Signs and verifies auth tokens.</td>
+                    </tr>
+                    <tr>
+                      <td><code>GITHUB_CLIENT_ID</code></td>
+                      <td><code>backend/config/passport.js</code></td>
+                      <td>String / no default</td>
+                      <td>GitHub OAuth client ID for the Passport helper.</td>
+                    </tr>
+                    <tr>
+                      <td><code>GITHUB_CLIENT_SECRET</code></td>
+                      <td><code>backend/config/passport.js</code></td>
+                      <td>String / no default</td>
+                      <td>GitHub OAuth client secret for the Passport helper.</td>
+                    </tr>
+                    <tr>
+                      <td><code>GITHUB_CALLBACK_URL</code></td>
+                      <td><code>backend/config/passport.js</code></td>
+                      <td>String / <code>http://localhost:4000/auth/github/callback</code></td>
+                      <td>Callback URL for the GitHub Passport strategy.</td>
+                    </tr>
+                    <tr>
+                      <td><code>VITE_BACKEND_URL</code></td>
+                      <td><code>frontend/src/config/runtime.js</code></td>
+                      <td>String / derived from host</td>
+                      <td>Overrides the backend API base URL.</td>
+                    </tr>
+                    <tr>
+                      <td><code>VITE_GRAFANA_URL</code></td>
+                      <td><code>frontend/src/config/runtime.js</code>, frontend deployment</td>
+                      <td>String / derived from host or <code>http://localhost:3000</code></td>
+                      <td>Controls the analytics link target for Grafana.</td>
+                    </tr>
+                    <tr>
+                      <td><code>VITE_PROMETHEUS_URL</code></td>
+                      <td><code>frontend/src/config/runtime.js</code>, frontend deployment</td>
+                      <td>String / derived from host or <code>http://localhost:9090</code></td>
+                      <td>Controls the analytics link target for Prometheus.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <h3>Deployment and infrastructure config</h3>
+              <div class="grid-2">
+                <div class="tile">
+                  <h3>Docker Compose</h3>
+                  <ul>
+                    <li><code>app</code> service builds <code>./backend</code> and maps port <code>4000</code>.</li>
+                    <li><code>frontend</code> service builds <code>./frontend</code> and maps port <code>5173</code>.</li>
+                    <li><code>mongo</code>, <code>prometheus</code>, <code>grafana</code>, and <code>node-exporter</code> are included in the stack.</li>
+                    <li>Grafana admin defaults to <code>admin / admin</code>.</li>
+                  </ul>
+                </div>
+                <div class="tile">
+                  <h3>Skaffold and kind</h3>
+                  <ul>
+                    <li><code>skaffold.yaml</code> builds backend and frontend artifacts locally.</li>
+                    <li>Port forwards are configured for <code>5173</code>, <code>4000</code>, <code>9090</code>, and <code>3000</code>.</li>
+                    <li><code>kind-config.yaml</code> enables ingress-ready control-plane port mappings for <code>80</code> and <code>443</code>.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="tile">
+                  <h3>Kubernetes</h3>
+                  <ul>
+                    <li><code>k8s/backend.yaml</code> deploys <code>ops-backend</code> with two replicas and <code>opsbot-sa</code>.</li>
+                    <li><code>k8s/frontend.yaml</code> deploys <code>ops-frontend</code> and exposes a NodePort service.</li>
+                    <li><code>k8s/mongo.yaml</code> provisions a PVC and MongoDB deployment.</li>
+                    <li><code>k8s/ingress.yaml</code> routes <code>/socket.io</code>, <code>/api</code>, and <code>/</code> for <code>opscommand.local</code>.</li>
+                  </ul>
+                </div>
+                <div class="tile">
+                  <h3>Monitoring</h3>
+                  <ul>
+                    <li>Prometheus scrapes the backend at <code>/metrics</code>.</li>
+                    <li>Alert rules track high error rate and p95 latency.</li>
+                    <li>Grafana is provisioned with a Prometheus datasource and the <code>OpsCommand Monitoring</code> dashboard.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>File</th>
+                      <th>Key values</th>
+                      <th>What it means</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>k8s/rbac.yaml</code></td>
+                      <td><code>opsbot-sa</code>, <code>opsbot-role</code>, <code>opsbot-rolebinding</code></td>
+                      <td>Read-only pod access plus deployment patch/update permissions.</td>
+                    </tr>
+                    <tr>
+                      <td><code>k8s/secret.yaml</code></td>
+                      <td>Base64 encoded <code>MONGO_URI</code></td>
+                      <td>Points K8s workloads at <code>mongodb://mongo-service:27017/opscommand</code>.</td>
+                    </tr>
+                    <tr>
+                      <td><code>monitoring/prometheus/prometheus.yml</code></td>
+                      <td>5s scrape interval, 5s evaluation interval</td>
+                      <td>Scrapes Prometheus itself, the backend, and node-exporter.</td>
+                    </tr>
+                    <tr>
+                      <td><code>monitoring/prometheus/alerts.yml</code></td>
+                      <td>Error rate &gt; 20%, p95 latency &gt; 1s</td>
+                      <td>Matches the alert rules also embedded in <code>k8s/monitoring.yaml</code>.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="section doc-section" id="guides" data-search="guides walkthroughs login profile commands kubernetes docker compose monitoring deployment auth dashboard ops terminal">
+              <div class="breadcrumbs">
+                <a href="#hero">Docs</a><span class="sep">/</span><span>Guides</span>
+              </div>
+              <h2 id="guides-title">Guides</h2>
+              <p class="lead">
+                These are the three workflows that show up most clearly in the codebase: auth and profile updates,
+                day-to-day ops command use, and local/Kubernetes deployment.
+              </p>
+
+              <div class="grid-3">
+                <div class="tile">
+                  <h3>Authenticate and manage your profile</h3>
+                  <ul>
+                    <li>Open the login screen and either register or sign in.</li>
+                    <li>The frontend stores the token in <code>localStorage</code> and validates it with <code>/api/auth/me</code>.</li>
+                    <li>Open the profile sidebar from the avatar to change your display name or password.</li>
+                    <li>Password changes require the current password and a new password of at least 6 characters.</li>
+                  </ul>
+                </div>
+                <div class="tile">
+                  <h3>Operate the cluster</h3>
+                  <ul>
+                    <li>Use <code>/help</code> to discover the available commands.</li>
+                    <li>Use <code>/status</code> to see pod counts and <code>/logs &lt;pod&gt;</code> to inspect logs.</li>
+                    <li>Use <code>/restart &lt;deployment&gt;</code> to stamp a rollout restart annotation.</li>
+                    <li>Use <code>/visualize</code> for the ASCII health map and <code>/userlist</code> for role/permission inventory.</li>
+                  </ul>
+                </div>
+                <div class="tile">
+                  <h3>Deploy locally</h3>
+                  <ul>
+                    <li>Run the Docker Compose stack for the easiest local path.</li>
+                    <li>Use <code>kind create cluster --config kind-config.yaml</code> for K8s.</li>
+                    <li>Then run <code>skaffold dev</code> to build and deploy the frontend and backend images.</li>
+                    <li>Use <code>opscommand.local</code> with the ingress controller for browser access.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="callout">
+                <strong>Because there is no automated test suite in the repo surface,</strong> these guides are the
+                most reliable way to validate the user-facing behavior by hand.
+              </div>
+            </section>
+
+            <section class="section doc-section" id="examples" data-search="examples code snippets curl docker compose kind skaffold auth requests slash commands promql dashboard metrics">
+              <div class="breadcrumbs">
+                <a href="#hero">Docs</a><span class="sep">/</span><span>Examples</span>
+              </div>
+              <h2 id="examples-title">Examples</h2>
+              <p class="lead">
+                These snippets are copy-paste ready and mirror the commands and request shapes already present in
+                the repository documentation or source.
+              </p>
+
+              <div class="stack">
+                <div class="tile">
+                  <h3>Register a user</h3>
+                  <div class="codeframe">
+                    <div class="codeframe-head">
+                      <span>POST /api/auth/register</span>
+                    </div>
+                    <pre><code class="language-bash">curl -X POST http://localhost:4000/api/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"jdoe","displayName":"Jane Doe","password":"secret123"}'</code></pre>
+                  </div>
+                </div>
+
+                <div class="tile">
+                  <h3>Log in and fetch the current user</h3>
+                  <div class="codeframe">
+                    <div class="codeframe-head">
+                      <span>Login then validate the token</span>
+                    </div>
+                    <pre><code class="language-bash">TOKEN=$(curl -s -X POST http://localhost:4000/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"jdoe","password":"secret123"}' | jq -r .token)
+
+curl http://localhost:4000/api/auth/me \
+  -H "Authorization: Bearer $TOKEN"</code></pre>
+                  </div>
+                </div>
+
+                <div class="tile">
+                  <h3>Monitoring queries from the README and dashboard</h3>
+                  <div class="codeframe">
+                    <div class="codeframe-head">
+                      <span>PromQL examples</span>
+                    </div>
+                    <pre><code class="language-promql">sum(rate(opscommand_commands_total[1m]))
+100 * sum(rate(opscommand_commands_total{status="error"}[5m]))
+    / clamp_min(sum(rate(opscommand_commands_total[5m])), 0.001)
+histogram_quantile(0.95, sum(rate(opscommand_command_duration_seconds_bucket[5m])) by (le))</code></pre>
+                  </div>
+                </div>
+
+                <div class="tile">
+                  <h3>Local deployment commands</h3>
+                  <div class="codeframe">
+                    <div class="codeframe-head">
+                      <span>Docker Compose and Kubernetes paths</span>
+                    </div>
+                    <pre><code class="language-bash">docker-compose up
+
+kind create cluster --config kind-config.yaml
+skaffold dev</code></pre>
+                  </div>
+                </div>
+
+                <div class="tile">
+                  <h3>Slash commands from the ops terminal</h3>
+                  <div class="codeframe">
+                    <div class="codeframe-head">
+                      <span>Examples pulled from the command modules</span>
+                    </div>
+                    <pre><code class="language-bash">/help
+/status
+/logs backend-pod-name
+/restart backend-deployment
+/visualize
+/userlist
+/clear</code></pre>
+                  </div>
+                </div>
+              </div>
+
+              <div class="callout">
+                <strong>Screenshot assets:</strong> <a href="../assets/operations.png">operations.png</a> and
+                <a href="../assets/dashboard.png">dashboard.png</a> are used in the Overview section above.
+              </div>
+            </section>
+
+            <div class="no-results" id="noResults" hidden>
+              No sections matched your search. Try a broader term like <code>auth</code>, <code>commands</code>,
+              <code>k8s</code>, or <code>monitoring</code>.
+            </div>
+
+            <footer>
+              Last updated: June 10, 2026. Changelog section omitted because the repository does not include a
+              <code>CHANGELOG.md</code> file or git tags.
+            </footer>
+          </div>
+        </main>
       </div>
-    </header>
+    </div>
 
-    <main class="shell">
-      <section class="panel reveal">
-        <h2>How It Works</h2>
-        <div class="arch-grid">
-          <article>
-            <h3>Frontend</h3>
-            <p>React + Vite UI with chat panel, ops terminal, and dashboard.</p>
-          </article>
-          <article>
-            <h3>Backend</h3>
-            <p>Express + Socket.io API with dynamic command execution modules.</p>
-          </article>
-          <article>
-            <h3>Cluster</h3>
-            <p>Kubernetes operations through official Node.js client integration.</p>
-          </article>
-          <article>
-            <h3>Observability</h3>
-            <p>Prometheus metrics and Grafana dashboards for rate, errors, and latency.</p>
-          </article>
-        </div>
-      </section>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script>
+      const STORAGE_KEY = 'opscommand-docs-theme';
+      const root = document.documentElement;
+      const body = document.body;
+      const themeToggle = document.getElementById('themeToggle');
+      const sidebar = document.getElementById('sidebar');
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      const overlay = document.getElementById('overlay');
+      const searchInput = document.getElementById('searchInput');
+      const noResults = document.getElementById('noResults');
+      const sections = [...document.querySelectorAll('.doc-section')];
+      const navLinks = [...document.querySelectorAll('.sidebar-nav a')];
 
-      <section class="panel terminal-panel reveal">
-        <div class="terminal-head">
-          <h2>Command Simulator</h2>
-          <span class="blink"></span>
-        </div>
-        <p class="terminal-note">A lightweight simulation of slash command execution flow.</p>
-        <div class="terminal" id="terminal" aria-live="polite"></div>
-      </section>
+      function setTheme(theme) {
+        root.setAttribute('data-theme', theme);
+        localStorage.setItem(STORAGE_KEY, theme);
+        themeToggle.textContent = theme === 'dark' ? '☾' : '☀';
+        themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+      }
 
-      <section class="metrics reveal">
-        <article class="metric-card">
-          <h3>Command Rate</h3>
-          <p class="metric-value" id="rate">0.00 cmd/s</p>
-        </article>
-        <article class="metric-card">
-          <h3>Error Rate</h3>
-          <p class="metric-value" id="errors">0.0%</p>
-        </article>
-        <article class="metric-card">
-          <h3>p95 Latency</h3>
-          <p class="metric-value" id="p95">0.000s</p>
-        </article>
-      </section>
-    </main>
+      const storedTheme = localStorage.getItem(STORAGE_KEY);
+      if (storedTheme === 'light' || storedTheme === 'dark') {
+        setTheme(storedTheme);
+      } else {
+        setTheme('dark');
+      }
 
-    <footer class="shell foot">
-      <p>OpsCommand Demo on GitHub Pages</p>
-    </footer>
+      themeToggle.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        setTheme(next);
+      });
 
-    <script src="./app.js"></script>
+      function setSidebarOpen(isOpen) {
+        body.classList.toggle('sidebar-open', isOpen);
+      }
+
+      sidebarToggle?.addEventListener('click', () => {
+        setSidebarOpen(!body.classList.contains('sidebar-open'));
+      });
+      overlay.addEventListener('click', () => setSidebarOpen(false));
+      navLinks.forEach((link) => link.addEventListener('click', () => setSidebarOpen(false)));
+
+      function anchorifyHeadings() {
+        document.querySelectorAll('.section h2, .section h3').forEach((heading) => {
+          if (!heading.id) {
+            const text = heading.textContent || 'section';
+            const base = text
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/^-+|-+$/g, '') || 'section';
+            let candidate = base;
+            let suffix = 2;
+            while (document.getElementById(candidate)) {
+              candidate = `${base}-${suffix}`;
+              suffix += 1;
+            }
+            heading.id = candidate;
+          }
+          if (heading.querySelector('.anchor-link')) return;
+          const anchor = document.createElement('a');
+          anchor.className = 'anchor-link';
+          anchor.href = `#${heading.id}`;
+          anchor.textContent = '¶';
+          anchor.title = 'Link to this heading';
+          anchor.setAttribute('aria-label', `Link to ${heading.textContent || heading.id}`);
+          heading.appendChild(anchor);
+        });
+      }
+
+      function makeCopyButton(pre) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'copy-btn';
+        button.textContent = 'Copy';
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(pre.innerText);
+          } catch {
+            const fallback = document.createElement('textarea');
+            fallback.value = pre.innerText;
+            fallback.setAttribute('readonly', '');
+            fallback.style.position = 'fixed';
+            fallback.style.opacity = '0';
+            document.body.appendChild(fallback);
+            fallback.select();
+            document.execCommand('copy');
+            fallback.remove();
+          }
+          const original = button.textContent;
+          button.textContent = 'Copied';
+          setTimeout(() => (button.textContent = original), 1200);
+        });
+        return button;
+      }
+
+      function attachCopyButtons() {
+        document.querySelectorAll('.codeframe').forEach((frame) => {
+          const pre = frame.querySelector('pre');
+          const head = frame.querySelector('.codeframe-head');
+          if (!pre || !head || head.querySelector('.copy-btn')) return;
+          head.append(makeCopyButton(pre));
+        });
+      }
+
+      function wrapCodeBlocks() {
+        document.querySelectorAll('pre').forEach((pre) => {
+          if (pre.closest('.codeframe')) return;
+          const frame = document.createElement('div');
+          frame.className = 'codeframe';
+          const head = document.createElement('div');
+          head.className = 'codeframe-head';
+          const label = document.createElement('span');
+          label.textContent = pre.dataset.caption || 'Code block';
+          head.append(label, makeCopyButton(pre));
+          pre.parentNode.insertBefore(frame, pre);
+          frame.append(head, pre);
+        });
+      }
+
+      function applySearch(term) {
+        const query = term.trim().toLowerCase();
+        let visible = 0;
+
+        sections.forEach((section) => {
+          const haystack = (section.dataset.search || section.textContent || '').toLowerCase();
+          const match = !query || haystack.includes(query);
+          section.hidden = !match;
+          if (match) visible += 1;
+        });
+
+        navLinks.forEach((link) => {
+          const section = document.querySelector(link.getAttribute('href'));
+          const haystack = (section?.dataset.search || '').toLowerCase();
+          link.style.opacity = !query || haystack.includes(query) ? '1' : '0.38';
+        });
+
+        noResults.hidden = visible > 0;
+      }
+
+      searchInput.addEventListener('input', (event) => applySearch(event.target.value));
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((entry) => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+          if (!visible) return;
+          navLinks.forEach((link) => {
+            link.classList.toggle('active', link.getAttribute('href') === `#${visible.target.id}`);
+          });
+        },
+        { rootMargin: '-18% 0px -68% 0px', threshold: [0.1, 0.25, 0.5] }
+      );
+
+      sections.forEach((section) => observer.observe(section));
+
+      anchorifyHeadings();
+      attachCopyButtons();
+      wrapCodeBlocks();
+      attachCopyButtons();
+      if (window.hljs) {
+        hljs.highlightAll();
+      }
+
+      applySearch('');
+    </script>
   </body>
 </html>

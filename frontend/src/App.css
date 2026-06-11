@@ -326,3 +326,27 @@
   opacity: 0.4;
   cursor: default;
 }
+
+@media (max-width: 760px) {
+  .app-topbar {
+    flex-wrap: wrap;
+  }
+
+  .topbar-status {
+    margin-left: 0;
+  }
+
+  .topbar-view-switch {
+    order: 4;
+    width: 100%;
+  }
+
+  .topbar-view-btn {
+    flex: 1;
+    padding: 7px 8px;
+  }
+
+  .topbar-terminal-toggle {
+    margin-left: auto;
+  }
+}

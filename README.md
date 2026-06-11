@@ -104,6 +104,8 @@ The application uses the following environment variables:
 
 **Frontend:**
 - `VITE_BACKEND_URL` - Backend API URL (default: http://opscommand.local)
+- `VITE_GRAFANA_URL` - Grafana URL used by the Analytics section (default: http://localhost:3000 locally)
+- `VITE_PROMETHEUS_URL` - Prometheus URL used by the Analytics section (default: http://localhost:9090 locally)
 
 ## Development
 
@@ -178,6 +180,8 @@ Grafana is preconfigured with:
     - error rate
     - p95 latency
 
+The frontend Analytics section links directly to Grafana, Prometheus, and the backend `/metrics` endpoint. Override `VITE_GRAFANA_URL` or `VITE_PROMETHEUS_URL` when the monitoring stack is exposed through a custom host or ingress path.
+
 Default Grafana credentials:
 
 - username: `admin`
@@ -214,13 +218,21 @@ kind create cluster --config kind-config.yaml
 skaffold dev
 ```
 
+`kind-config.yaml` is the Kind cluster configuration. Do not pass it to `skaffold dev --config`; Skaffold reads this project from `skaffold.yaml` by default. If you want to be explicit, use `skaffold dev -f skaffold.yaml`.
+
 Skaffold will:
 1. Build Docker images for frontend and backend
-2. Deploy all Kubernetes manifests from `k8s/`
-3. Watch for file changes and auto-rebuild/redeploy
-4. Stream logs from all pods
+2. Deploy all Kubernetes manifests from `k8s/`, including Prometheus and Grafana
+3. Forward frontend, backend, Prometheus, and Grafana ports to localhost
+4. Watch for file changes and auto-rebuild/redeploy
+5. Stream logs from all pods
 
 Access the application at http://opscommand.local (configure your `/etc/hosts` if needed).
+
+Skaffold also exposes the monitoring tools locally:
+
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000
 
 ## Deployment
 

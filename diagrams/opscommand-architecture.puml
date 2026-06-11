@@ -27,8 +27,9 @@ package "Client Experience\n(React + Vite)" as FE {
   component "Authentication View\nLogin / Register" as LoginScreen <<ui>>
   component "Operations View\nTeam Chat + Ops Terminal" as OperationsView <<ui>>
   component "Dashboard View\nCluster overview + users" as DashboardView <<ui>>
+  component "Analytics View\nMonitoring destination menu" as AnalyticsView <<ui>>
   component "Profile Sidebar\nDisplay name + password" as ProfileSidebar <<ui>>
-  component "runtime.js\nBACKEND_URL resolution" as RuntimeConfig <<config>>
+  component "runtime.js\nBackend + monitoring URL resolution" as RuntimeConfig <<config>>
 }
 
 package "Application Services\n(Node.js + Express + Socket.io)" as BE {
@@ -57,6 +58,12 @@ package "Data & Control Plane" as Infra {
   component "MongoDB Pod\nPersistent data store" as MongoPod <<pod>>
 }
 
+package "Monitoring Stack" as Monitoring {
+  component "Prometheus\nMetrics + alert rules" as Prometheus <<service>>
+  component "Grafana\nOpsCommand Monitoring dashboard" as Grafana <<service>>
+  component "Node Exporter\nHost metrics" as NodeExporter <<service>>
+}
+
 Engineer --> Browser : uses UI
 Browser --> Ingress : HTTP / HTTPS
 Ingress --> FrontendService : routes /
@@ -68,6 +75,7 @@ Browser --> AppShell : loads SPA
 AppShell --> LoginScreen : unauthenticated state
 AppShell --> OperationsView : chat + terminal workspace
 AppShell --> DashboardView : cluster summary
+AppShell --> AnalyticsView : monitoring launchpad
 AppShell --> ProfileSidebar : profile edits
 
 FrontendService --> FrontendPod
@@ -82,9 +90,13 @@ Server --> Persistence : connects to MongoDB and models
 Server --> K8sClient : loads in-cluster or kubeconfig
 Server --> CommandRegistry : loads command modules at startup
 Server --> Dispatcher : routes slash commands
+Server --> Prometheus : exposes /metrics for scraping
 
 Persistence --> MongoDB : users and messages
 K8sClient --> KubeAPI : CoreV1Api / AppsV1Api / KubernetesObjectApi
+Prometheus --> Server : scrape /metrics
+Prometheus --> NodeExporter : scrape host metrics
+Grafana --> Prometheus : query datasource
 
 ServiceAccount --> RBAC : bound to
 BackendPod --> ServiceAccount : runs as
@@ -106,6 +118,9 @@ OperationsView --> SocketHub : emits team-message and ops-command
 ProfileSidebar --> AuthRoutes : PUT /api/auth/profile
 LoginScreen --> AuthRoutes : POST /api/auth/login and /register
 DashboardView --> DashboardAPI : GET /api/dashboard/overview
+AnalyticsView --> Grafana : open dashboard
+AnalyticsView --> Prometheus : open query UI
+AnalyticsView --> Server : open /metrics
 
 note right of SocketHub
   Real-time flow, grouped:
@@ -125,6 +140,13 @@ note bottom of DashboardAPI
   Dashboard grouping:
   - counts Running pods for ops-backend, ops-frontend, ops-mongo
   - returns registered users sorted by createdAt
+end note
+
+note bottom of AnalyticsView
+  Analytics menu destinations:
+  - Grafana from VITE_GRAFANA_URL or local :3000
+  - Prometheus from VITE_PROMETHEUS_URL or local :9090
+  - Backend metrics from BACKEND_URL + /metrics
 end note
 
 legend right

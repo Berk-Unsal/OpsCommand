@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { BACKEND_URL } from '../config/runtime';
 import './Dashboard.css';
@@ -57,7 +57,7 @@ export default function Dashboard({ token }) {
   });
   const [users, setUsers] = useState([]);
 
-  const fetchOverview = async () => {
+  const fetchOverview = useCallback(async () => {
     if (!token) return;
 
     setLoading(true);
@@ -79,11 +79,11 @@ export default function Dashboard({ token }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     fetchOverview();
-  }, [token]);
+  }, [fetchOverview]);
 
   const pie = useMemo(() => toPieStops(runningByService), [runningByService]);
 

@@ -22,6 +22,11 @@ spec:
         imagePullPolicy: Never # Use the image we built locally
         ports:
         - containerPort: 5173
+        env:
+        - name: VITE_GRAFANA_URL
+          value: http://localhost:3000
+        - name: VITE_PROMETHEUS_URL
+          value: http://localhost:9090
 
 ---
 # 2. Frontend Service (External Access)

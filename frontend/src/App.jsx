@@ -5,6 +5,7 @@ import './App.css';
 import TeamChat from './components/TeamChat';
 import OpsTerminal from './components/OpsTerminal';
 import Dashboard from './components/Dashboard';
+import Analytics from './components/Analytics';
 import LoginScreen from './components/LoginScreen';
 import ProfileSidebar from './components/ProfileSidebar';
 import { BACKEND_URL } from './config/runtime';
@@ -17,7 +18,7 @@ function App() {
   // ── Auth state ──────────────────────────────────────────
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(() => Boolean(localStorage.getItem('ops_token')));
   const [profileOpen, setProfileOpen] = useState(false);
   const [opsCollapsed, setOpsCollapsed] = useState(false);
   const [activePage, setActivePage] = useState('operations');
@@ -32,7 +33,6 @@ function App() {
   useEffect(() => {
     const savedToken = localStorage.getItem('ops_token');
     if (!savedToken) {
-      setAuthLoading(false);
       return;
     }
     axios
@@ -181,6 +181,13 @@ function App() {
           >
             Dashboard
           </button>
+          <button
+            type="button"
+            className={`topbar-view-btn ${activePage === 'analytics' ? 'active' : ''}`}
+            onClick={() => setActivePage('analytics')}
+          >
+            Analytics
+          </button>
         </div>
         <button
           type="button"
@@ -251,8 +258,10 @@ function App() {
             </button>
           </form>
         </>
-      ) : (
+      ) : activePage === 'dashboard' ? (
         <Dashboard token={token} />
+      ) : (
+        <Analytics />
       )}
     </div>
   );
