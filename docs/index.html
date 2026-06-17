@@ -75,6 +75,7 @@
         color: var(--text);
         font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         line-height: 1.6;
+        overflow-x: hidden;
       }
 
       [hidden] {
@@ -486,6 +487,7 @@
       .section h2::before {
         content: '';
         display: block;
+        flex: 0 0 auto;
         width: 4px;
         height: 1.2em;
         border-radius: 999px;
@@ -521,7 +523,15 @@
         gap: 16px;
       }
 
+      .grid-2 > *,
+      .grid-3 > *,
+      .hero-grid > *,
+      .stack > * {
+        min-width: 0;
+      }
+
       .tile {
+        min-width: 0;
         padding: 16px;
         border: 1px solid var(--border);
         border-radius: 8px;
@@ -614,9 +624,11 @@
       .path-list li code {
         font-family: 'Fira Code', monospace;
         font-size: 0.88rem;
+        overflow-wrap: anywhere;
       }
 
       .codeframe {
+        min-width: 0;
         margin: 16px 0;
         border: 1px solid var(--border);
         border-radius: 8px;
@@ -636,6 +648,11 @@
         font-size: 0.82rem;
       }
 
+      .codeframe-head span {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+
       .copy-btn {
         display: inline-flex;
         align-items: center;
@@ -649,6 +666,7 @@
         font: inherit;
         font-size: 0.78rem;
         font-weight: 700;
+        flex: 0 0 auto;
       }
 
       .copy-btn:hover {
@@ -674,6 +692,7 @@
       }
 
       .table-wrap {
+        max-width: 100%;
         overflow: auto;
         border: 1px solid var(--border);
         border-radius: 8px;
@@ -734,6 +753,7 @@
       }
 
       .module-card {
+        min-width: 0;
         border: 1px solid var(--border);
         border-radius: 8px;
         background: color-mix(in srgb, var(--bg-soft) 58%, var(--bg-panel));
@@ -749,6 +769,17 @@
         justify-content: space-between;
         gap: 12px;
         font-weight: 800;
+      }
+
+      .module-card summary > span:first-child,
+      .inventory summary > span:first-child {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+
+      .module-card summary .badge,
+      .inventory summary .badge {
+        flex: 0 0 auto;
       }
 
       .module-card[open] summary,
@@ -837,9 +868,14 @@
           padding-bottom: 12px;
         }
 
+        .topbar-left {
+          flex: 1 1 auto;
+        }
+
         .topbar-search {
           width: 100%;
           max-width: none;
+          margin-left: 0;
           order: 3;
         }
 
@@ -849,11 +885,16 @@
       }
 
       @media (max-width: 900px) {
+        :root {
+          --sidebar-width: 300px;
+        }
+
         .layout {
           display: block;
         }
 
         .sidebar {
+          display: none;
           position: fixed;
           inset: var(--topbar-height) auto 0 0;
           width: min(var(--sidebar-width), 88vw);
@@ -863,11 +904,17 @@
           box-shadow: var(--shadow);
         }
 
+        body.sidebar-open {
+          overflow: hidden;
+        }
+
         body.sidebar-open .sidebar {
+          display: block;
           transform: translateX(0);
         }
 
         .sidebar.mobile-visible {
+          display: block;
           transform: translateX(0);
         }
 
@@ -896,22 +943,192 @@
       }
 
       @media (max-width: 640px) {
+        body {
+          font-size: 15px;
+        }
+
+        .topbar {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 10px;
+          padding: 10px 12px;
+        }
+
+        .topbar-left {
+          grid-column: 1;
+          width: 100%;
+        }
+
+        .topbar-actions {
+          grid-column: 2;
+          justify-self: end;
+        }
+
+        .topbar-search {
+          grid-column: 1 / -1;
+          order: initial;
+        }
+
+        .brand-title {
+          gap: 8px;
+          font-size: 0.96rem;
+        }
+
+        .brand-subtitle {
+          max-width: 100%;
+          font-size: 0.76rem;
+        }
+
+        .version-pill {
+          padding: 2px 7px;
+          font-size: 0.7rem;
+        }
+
+        .icon-btn,
+        .text-link {
+          width: 36px;
+          height: 36px;
+          padding: 0;
+          justify-content: center;
+        }
+
+        .text-link span:first-child {
+          display: none;
+        }
+
+        .text-link span.label {
+          display: inline;
+        }
+
+        .search-input {
+          min-width: 0;
+          padding: 10px 0;
+          font-size: 0.94rem;
+        }
+
+        .content {
+          padding: 14px 10px 34px;
+        }
+
         .hero,
         .section {
+          border-radius: 8px;
           padding-left: 16px;
           padding-right: 16px;
         }
 
-        .text-link span.label {
-          display: none;
+        .hero {
+          gap: 15px;
+          padding-top: 20px;
+          padding-bottom: 20px;
         }
 
-        .topbar-actions {
-          gap: 8px;
+        .hero h1 {
+          font-size: clamp(2rem, 12vw, 2.45rem);
+          line-height: 1.08;
+        }
+
+        .hero p,
+        .section p.lead {
+          font-size: 0.95rem;
+        }
+
+        .section {
+          margin-top: 16px;
+          padding-top: 18px;
+          padding-bottom: 18px;
+          box-shadow: none;
+        }
+
+        .section h2 {
+          align-items: flex-start;
+          font-size: 1.22rem;
+        }
+
+        .section h3 {
+          font-size: 0.98rem;
+        }
+
+        .hero-badges,
+        .module-meta {
+          gap: 6px;
+        }
+
+        .badge,
+        .chip {
+          white-space: normal;
+        }
+
+        .info-card,
+        .tile {
+          padding: 13px;
+        }
+
+        .figure {
+          padding: 8px;
+        }
+
+        .inventory summary,
+        .module-card summary {
+          align-items: flex-start;
+          padding: 12px;
+        }
+
+        .inventory-body,
+        .module-card-body {
+          padding: 0 12px 12px;
+        }
+
+        .codeframe {
+          margin: 12px 0;
+        }
+
+        .codeframe-head {
+          padding: 9px 10px;
+        }
+
+        pre code {
+          padding: 12px;
+          font-size: 0.8rem;
+          line-height: 1.55;
+        }
+
+        table {
+          min-width: 620px;
+          font-size: 0.86rem;
+        }
+
+        th,
+        td {
+          padding: 10px;
         }
 
         .search-shell span {
           display: none;
+        }
+      }
+
+      @media (max-width: 420px) {
+        .brand-subtitle {
+          display: none;
+        }
+
+        .topbar-left {
+          gap: 10px;
+        }
+
+        .version-pill {
+          display: none;
+        }
+
+        .hero,
+        .section {
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+
+        .sidebar {
+          width: min(300px, 92vw);
         }
       }
     </style>
@@ -920,7 +1137,7 @@
     <div class="shell">
       <header class="topbar">
         <div class="topbar-left">
-          <button class="icon-btn mobile-only" id="sidebarToggle" type="button" aria-label="Toggle navigation">
+          <button class="icon-btn mobile-only" id="sidebarToggle" type="button" aria-label="Toggle navigation" aria-controls="sidebar" aria-expanded="false">
             ☰
           </button>
           <div class="brand">
@@ -986,11 +1203,11 @@
             <div class="sidebar-block">
               <div class="sidebar-kicker">Quick links</div>
               <div class="sidebar-note">
-                Root redirect: <a href="../index.html">index.html</a><br />
+                Root page: <a href="./">index.html</a><br />
                 Screenshot assets:
-                <a href="../assets/operations.png">operations.png</a>,
-                <a href="../assets/dashboard.png">dashboard.png</a>,
-                <a href="../assets/analytics.png">analytics.png</a>
+                <a href="assets/operations.png">operations.png</a>,
+                <a href="assets/dashboard.png">dashboard.png</a>,
+                <a href="assets/analytics.png">analytics.png</a>
               </div>
             </div>
           </div>
@@ -1070,7 +1287,7 @@
               </div>
 
               <figure class="figure visual-callout">
-                <img src="../assets/dashboard.png" alt="OpsCommand dashboard view showing running pods and registered users" loading="lazy" />
+                <img src="assets/dashboard.png" alt="OpsCommand dashboard view showing running pods and registered users" loading="lazy" />
                 <figcaption>Dashboard view: cluster health summary plus registered users table.</figcaption>
               </figure>
 
@@ -1259,7 +1476,7 @@ docker-compose up</code></pre>
               </div>
 
               <figure class="figure visual-callout">
-                <img src="../assets/operations.png" alt="OpsCommand operations workspace with chat and terminal command output" loading="lazy" />
+                <img src="assets/operations.png" alt="OpsCommand operations workspace with chat and terminal command output" loading="lazy" />
                 <figcaption>Operations workspace: chat, slash-command entry, and live terminal feedback in one view.</figcaption>
               </figure>
 
@@ -1905,7 +2122,7 @@ Browser ── REST/JWT ──► Express backend ──► MongoDB
               </div>
 
               <figure class="figure visual-callout">
-                <img src="../assets/analytics.png" alt="OpsCommand analytics view with Grafana, Prometheus, and backend metrics targets" loading="lazy" />
+                <img src="assets/analytics.png" alt="OpsCommand analytics view with Grafana, Prometheus, and backend metrics targets" loading="lazy" />
                 <figcaption>Analytics view: quick access to Grafana, Prometheus, and backend telemetry endpoints.</figcaption>
               </figure>
 
@@ -2072,9 +2289,9 @@ skaffold dev</code></pre>
               </div>
 
               <div class="callout">
-                <strong>Screenshot assets:</strong> <a href="../assets/operations.png">operations.png</a>,
-                <a href="../assets/dashboard.png">dashboard.png</a>, and
-                <a href="../assets/analytics.png">analytics.png</a> are used in their matching sections above.
+                <strong>Screenshot assets:</strong> <a href="assets/operations.png">operations.png</a>,
+                <a href="assets/dashboard.png">dashboard.png</a>, and
+                <a href="assets/analytics.png">analytics.png</a> are used in their matching sections above.
               </div>
             </section>
 
@@ -2101,6 +2318,7 @@ skaffold dev</code></pre>
       const sidebar = document.getElementById('sidebar');
       const sidebarToggle = document.getElementById('sidebarToggle');
       const overlay = document.getElementById('overlay');
+      const topbar = document.querySelector('.topbar');
       const searchInput = document.getElementById('searchInput');
       const noResults = document.getElementById('noResults');
       const sections = [...document.querySelectorAll('.doc-section')];
@@ -2129,12 +2347,23 @@ skaffold dev</code></pre>
 
       function setSidebarOpen(isOpen) {
         body.classList.toggle('sidebar-open', isOpen);
+        sidebarToggle?.setAttribute('aria-expanded', String(isOpen));
       }
 
       sidebarToggle?.addEventListener('click', () => {
         setSidebarOpen(!body.classList.contains('sidebar-open'));
       });
       overlay.addEventListener('click', () => setSidebarOpen(false));
+
+      function syncTopbarHeight() {
+        const height = Math.ceil(topbar?.getBoundingClientRect().height || 72);
+        root.style.setProperty('--topbar-height', `${height}px`);
+      }
+
+      syncTopbarHeight();
+      window.addEventListener('resize', syncTopbarHeight);
+      window.addEventListener('orientationchange', syncTopbarHeight);
+      document.fonts?.ready.then(syncTopbarHeight);
 
       function sectionIdFromHash(hash) {
         if (!hash || hash === '#') return null;
