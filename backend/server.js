@@ -81,17 +81,26 @@ function normalizePodListResponse(res) {
   return [];
 }
 
-function getWorkloadKey(pod) {
-  const appLabel = String(pod?.metadata?.labels?.app || '').toLowerCase();
-  if (appLabel === 'backend') return 'ops-backend';
-  if (appLabel === 'frontend') return 'ops-frontend';
-  if (appLabel === 'mongo') return 'ops-mongo';
+function stripGeneratedPodSuffix(name) {
+  return String(name || 'unknown')
+    .replace(/-[a-z0-9]{9,10}-[a-z0-9]{5}$/i, '')
+    .replace(/-[a-z0-9]{9,10}$/i, '')
+    .replace(/-[a-z0-9]{5}$/i, '');
+}
 
-  const podName = String(pod?.metadata?.name || '').toLowerCase();
-  if (podName.includes('backend')) return 'ops-backend';
-  if (podName.includes('frontend')) return 'ops-frontend';
-  if (podName.includes('mongo')) return 'ops-mongo';
-  return null;
+function getWorkloadKey(pod) {
+  const ownerName = pod?.metadata?.ownerReferences?.[0]?.name;
+  if (ownerName) {
+    return stripGeneratedPodSuffix(ownerName);
+  }
+
+  const podName = pod?.metadata?.name;
+  if (podName) {
+    return stripGeneratedPodSuffix(podName);
+  }
+
+  const labels = pod?.metadata?.labels || {};
+  return labels['app.kubernetes.io/name'] || labels.app || labels['k8s-app'] || labels.component || 'unknown';
 }
 
 function authFromBearer(req, res, next) {
@@ -113,18 +122,12 @@ app.get('/api/dashboard/overview', authFromBearer, async (req, res) => {
     const podRes = await k8sApi.listNamespacedPod({ namespace: 'default' });
     const pods = normalizePodListResponse(podRes);
 
-    const runningByService = {
-      'ops-backend': 0,
-      'ops-frontend': 0,
-      'ops-mongo': 0,
-    };
+    const runningPodsByWorkload = {};
 
     for (const pod of pods) {
       if (pod?.status?.phase !== 'Running') continue;
       const workloadKey = getWorkloadKey(pod);
-      if (workloadKey) {
-        runningByService[workloadKey] += 1;
-      }
+      runningPodsByWorkload[workloadKey] = (runningPodsByWorkload[workloadKey] || 0) + 1;
     }
 
     const users = await User.find({}, 'username displayName role createdAt')
@@ -132,7 +135,8 @@ app.get('/api/dashboard/overview', authFromBearer, async (req, res) => {
       .lean();
 
     res.json({
-      runningByService,
+      runningPodsByWorkload,
+      runningByService: runningPodsByWorkload,
       users,
       fetchedAt: new Date().toISOString(),
     });

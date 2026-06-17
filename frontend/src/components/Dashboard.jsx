@@ -3,39 +3,53 @@ import axios from 'axios';
 import { BACKEND_URL } from '../config/runtime';
 import './Dashboard.css';
 
-const SEGMENTS = [
-  { key: 'ops-backend', label: 'ops-backend', color: '#31c48d' },
-  { key: 'ops-frontend', label: 'ops-frontend', color: '#0ea5e9' },
-  { key: 'ops-mongo', label: 'ops-mongo', color: '#f59e0b' },
+const POD_COLORS = [
+  '#31c48d',
+  '#0ea5e9',
+  '#f59e0b',
+  '#a78bfa',
+  '#f43f5e',
+  '#14b8a6',
+  '#eab308',
+  '#60a5fa',
 ];
 
 function toPieStops(data) {
-  const total = SEGMENTS.reduce((acc, item) => acc + (data[item.key] || 0), 0);
+  const entries = Object.entries(data)
+    .map(([key, count]) => ({
+      key,
+      label: key,
+      count: Number(count || 0),
+    }))
+    .filter((entry) => entry.count > 0)
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+    .map((entry, index) => ({
+      ...entry,
+      color: POD_COLORS[index % POD_COLORS.length],
+    }));
+
+  const total = entries.reduce((acc, item) => acc + item.count, 0);
   if (!total) {
     return {
       gradient: 'conic-gradient(#2f3846 0deg 360deg)',
       total: 0,
-      entries: SEGMENTS.map((item) => ({ ...item, count: 0, percent: 0 })),
+      entries: [],
     };
   }
 
   let angleStart = 0;
   const parts = [];
-  const entries = SEGMENTS.map((item) => {
-    const count = data[item.key] || 0;
-    const percent = (count / total) * 100;
-    const sweep = (count / total) * 360;
+  const entriesWithPercent = entries.map((item) => {
+    const percent = (item.count / total) * 100;
+    const sweep = (item.count / total) * 360;
     const angleEnd = angleStart + sweep;
 
-    if (count > 0) {
-      parts.push(`${item.color} ${angleStart}deg ${angleEnd}deg`);
-    }
+    parts.push(`${item.color} ${angleStart}deg ${angleEnd}deg`);
 
     angleStart = angleEnd;
 
     return {
       ...item,
-      count,
       percent,
     };
   });
@@ -43,18 +57,14 @@ function toPieStops(data) {
   return {
     gradient: `conic-gradient(${parts.join(', ')})`,
     total,
-    entries,
+    entries: entriesWithPercent,
   };
 }
 
 export default function Dashboard({ token }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [runningByService, setRunningByService] = useState({
-    'ops-backend': 0,
-    'ops-frontend': 0,
-    'ops-mongo': 0,
-  });
+  const [runningPodsByWorkload, setRunningPodsByWorkload] = useState({});
   const [users, setUsers] = useState([]);
 
   const fetchOverview = useCallback(async () => {
@@ -68,11 +78,12 @@ export default function Dashboard({ token }) {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setRunningByService({
-        'ops-backend': Number(res.data?.runningByService?.['ops-backend'] || 0),
-        'ops-frontend': Number(res.data?.runningByService?.['ops-frontend'] || 0),
-        'ops-mongo': Number(res.data?.runningByService?.['ops-mongo'] || 0),
-      });
+      const podGroups = res.data?.runningPodsByWorkload || res.data?.runningByService || {};
+      setRunningPodsByWorkload(
+        Object.fromEntries(
+          Object.entries(podGroups).map(([key, value]) => [key, Number(value || 0)])
+        )
+      );
       setUsers(Array.isArray(res.data?.users) ? res.data.users : []);
     } catch (err) {
       setError(err?.response?.data?.error || 'Could not load dashboard data.');
@@ -85,7 +96,7 @@ export default function Dashboard({ token }) {
     fetchOverview();
   }, [fetchOverview]);
 
-  const pie = useMemo(() => toPieStops(runningByService), [runningByService]);
+  const pie = useMemo(() => toPieStops(runningPodsByWorkload), [runningPodsByWorkload]);
 
   return (
     <div className="dashboard-wrap">
@@ -101,7 +112,7 @@ export default function Dashboard({ token }) {
       <div className="dashboard-grid">
         <section className="dashboard-card">
           <h3>Running Pods</h3>
-          <p className="dashboard-subtitle">ops-backend vs ops-frontend vs ops-mongo</p>
+          <p className="dashboard-subtitle">All running workloads in the default namespace</p>
 
           <div className="pod-chart-row">
             <div className="pod-donut" style={{ background: pie.gradient }}>
@@ -112,6 +123,9 @@ export default function Dashboard({ token }) {
             </div>
 
             <ul className="pod-legend">
+              {pie.entries.length === 0 && (
+                <li className="pod-legend-empty">No running pods found.</li>
+              )}
               {pie.entries.map((entry) => (
                 <li key={entry.key}>
                   <span className="legend-dot" style={{ backgroundColor: entry.color }} />

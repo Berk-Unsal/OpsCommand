@@ -129,6 +129,9 @@
   flex-direction: column;
   gap: 10px;
   min-width: 230px;
+  max-height: 240px;
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .pod-legend li {
@@ -157,6 +160,11 @@
 
 .legend-percent {
   color: #90a8c2;
+}
+
+.pod-legend-empty {
+  color: #89a0be;
+  grid-template-columns: 1fr;
 }
 
 .users-card {

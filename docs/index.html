@@ -554,8 +554,13 @@
         background: var(--bg-soft);
       }
 
+      .figure.visual-callout {
+        margin: 18px 0;
+      }
+
       .figure img {
         width: 100%;
+        height: auto;
         display: block;
         border-radius: 8px;
         border: 1px solid var(--border);
@@ -982,7 +987,10 @@
               <div class="sidebar-kicker">Quick links</div>
               <div class="sidebar-note">
                 Root redirect: <a href="../index.html">index.html</a><br />
-                Screenshot assets: <a href="../assets/operations.png">operations.png</a>, <a href="../assets/dashboard.png">dashboard.png</a>
+                Screenshot assets:
+                <a href="../assets/operations.png">operations.png</a>,
+                <a href="../assets/dashboard.png">dashboard.png</a>,
+                <a href="../assets/analytics.png">analytics.png</a>
               </div>
             </div>
           </div>
@@ -1060,6 +1068,11 @@
                   </ul>
                 </div>
               </div>
+
+              <figure class="figure visual-callout">
+                <img src="../assets/dashboard.png" alt="OpsCommand dashboard view showing running pods and registered users" loading="lazy" />
+                <figcaption>Dashboard view: cluster health summary plus registered users table.</figcaption>
+              </figure>
 
               <h3>Repository map</h3>
               <p class="lead">
@@ -1166,27 +1179,17 @@
                 </details>
 
                 <details>
-                  <summary>Assets and media <span class="badge">4 files</span></summary>
+                  <summary>Assets and media <span class="badge">5 files</span></summary>
                   <div class="inventory-body">
                     <ul class="path-list">
                       <li><code>assets/operations.png</code></li>
                       <li><code>assets/dashboard.png</code></li>
+                      <li><code>assets/analytics.png</code></li>
                       <li><code>frontend/src/assets/react.svg</code></li>
                       <li><code>frontend/public/vite.svg</code></li>
                     </ul>
                   </div>
                 </details>
-              </div>
-
-              <div class="grid-2" style="margin-top: 18px;">
-                <figure class="figure">
-                  <img src="../assets/operations.png" alt="OpsCommand operations view screenshot" />
-                  <figcaption>Operations view: split chat and ops terminal with a unified command input.</figcaption>
-                </figure>
-                <figure class="figure">
-                  <img src="../assets/dashboard.png" alt="OpsCommand dashboard view screenshot" />
-                  <figcaption>Dashboard view: cluster health summary plus registered users table.</figcaption>
-                </figure>
               </div>
             </section>
 
@@ -1254,6 +1257,11 @@ docker-compose up</code></pre>
                   </p>
                 </div>
               </div>
+
+              <figure class="figure visual-callout">
+                <img src="../assets/operations.png" alt="OpsCommand operations workspace with chat and terminal command output" loading="lazy" />
+                <figcaption>Operations workspace: chat, slash-command entry, and live terminal feedback in one view.</figcaption>
+              </figure>
 
               <div class="callout">
                 <strong>Tip:</strong> if you prefer Kubernetes, jump to the
@@ -1896,6 +1904,11 @@ Browser ── REST/JWT ──► Express backend ──► MongoDB
                 </div>
               </div>
 
+              <figure class="figure visual-callout">
+                <img src="../assets/analytics.png" alt="OpsCommand analytics view with Grafana, Prometheus, and backend metrics targets" loading="lazy" />
+                <figcaption>Analytics view: quick access to Grafana, Prometheus, and backend telemetry endpoints.</figcaption>
+              </figure>
+
               <div class="table-wrap">
                 <table>
                   <thead>
@@ -2059,8 +2072,9 @@ skaffold dev</code></pre>
               </div>
 
               <div class="callout">
-                <strong>Screenshot assets:</strong> <a href="../assets/operations.png">operations.png</a> and
-                <a href="../assets/dashboard.png">dashboard.png</a> are used in the Overview section above.
+                <strong>Screenshot assets:</strong> <a href="../assets/operations.png">operations.png</a>,
+                <a href="../assets/dashboard.png">dashboard.png</a>, and
+                <a href="../assets/analytics.png">analytics.png</a> are used in their matching sections above.
               </div>
             </section>
 
@@ -2091,6 +2105,8 @@ skaffold dev</code></pre>
       const noResults = document.getElementById('noResults');
       const sections = [...document.querySelectorAll('.doc-section')];
       const navLinks = [...document.querySelectorAll('.sidebar-nav a')];
+      let requestedSectionId = null;
+      let requestedSectionTimer;
 
       function setTheme(theme) {
         root.setAttribute('data-theme', theme);
@@ -2119,7 +2135,47 @@ skaffold dev</code></pre>
         setSidebarOpen(!body.classList.contains('sidebar-open'));
       });
       overlay.addEventListener('click', () => setSidebarOpen(false));
-      navLinks.forEach((link) => link.addEventListener('click', () => setSidebarOpen(false)));
+
+      function sectionIdFromHash(hash) {
+        if (!hash || hash === '#') return null;
+        const rawId = decodeURIComponent(hash.slice(1));
+        const target = document.getElementById(rawId);
+        return target?.closest('.doc-section')?.id || null;
+      }
+
+      function setActiveNav(sectionId) {
+        navLinks.forEach((link) => {
+          const isActive = link.getAttribute('href') === `#${sectionId}`;
+          link.classList.toggle('active', isActive);
+          if (isActive) {
+            link.setAttribute('aria-current', 'true');
+          } else {
+            link.removeAttribute('aria-current');
+          }
+        });
+      }
+
+      function holdActiveNav(sectionId) {
+        requestedSectionId = sectionId;
+        window.clearTimeout(requestedSectionTimer);
+        setActiveNav(sectionId);
+        requestedSectionTimer = window.setTimeout(() => {
+          requestedSectionId = null;
+        }, 1400);
+      }
+
+      navLinks.forEach((link) =>
+        link.addEventListener('click', () => {
+          const sectionId = sectionIdFromHash(link.hash);
+          if (sectionId) holdActiveNav(sectionId);
+          setSidebarOpen(false);
+        })
+      );
+
+      window.addEventListener('hashchange', () => {
+        const sectionId = sectionIdFromHash(window.location.hash);
+        if (sectionId) holdActiveNav(sectionId);
+      });
 
       function anchorifyHeadings() {
         document.querySelectorAll('.section h2, .section h3').forEach((heading) => {
@@ -2216,6 +2272,12 @@ skaffold dev</code></pre>
         });
 
         noResults.hidden = visible > 0;
+        if (query && visible > 0) {
+          const firstVisible = sections.find((section) => !section.hidden);
+          if (firstVisible) setActiveNav(firstVisible.id);
+        } else if (!query) {
+          setActiveNav(sectionIdFromHash(window.location.hash) || 'overview');
+        }
       }
 
       searchInput.addEventListener('input', (event) => applySearch(event.target.value));
@@ -2226,9 +2288,12 @@ skaffold dev</code></pre>
             .filter((entry) => entry.isIntersecting)
             .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
           if (!visible) return;
-          navLinks.forEach((link) => {
-            link.classList.toggle('active', link.getAttribute('href') === `#${visible.target.id}`);
-          });
+          if (requestedSectionId && visible.target.id !== requestedSectionId) return;
+          if (visible.target.id === requestedSectionId) {
+            requestedSectionId = null;
+            window.clearTimeout(requestedSectionTimer);
+          }
+          setActiveNav(visible.target.id);
         },
         { rootMargin: '-18% 0px -68% 0px', threshold: [0.1, 0.25, 0.5] }
       );
@@ -2244,6 +2309,7 @@ skaffold dev</code></pre>
       }
 
       applySearch('');
+      setActiveNav(sectionIdFromHash(window.location.hash) || 'overview');
     </script>
   </body>
 </html>
